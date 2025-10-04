@@ -82,7 +82,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
   let environment = '';
   if (typeof text === 'string') {
     const params = text.split(/\s+/);
-    environment = params[0];
+    environment = params[0].trim();
   }
 
   if (!environment) {

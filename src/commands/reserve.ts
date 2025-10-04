@@ -5,12 +5,12 @@ import type { Bindings } from '../types';
 
 export default async function (c: Context<{ Bindings: Bindings }>) {
   const { text, user_id } = await c.req.parseBody();
-  if (!text || !user_id || typeof text !== 'string') {
+  if (typeof text !== 'string' || !text.trim() || !user_id) {
     return c.notFound();
   }
 
   const params = text.split(/\s+/);
-  const environment = params[0];
+  const environment = params[0].trim();
 
   if (!ENVIRONMENTS.includes(environment)) {
     return c.json({
