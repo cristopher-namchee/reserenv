@@ -86,7 +86,10 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
   }
 
   if (!environment) {
-    const blockBody = await generateEnvironmentTables(ENVIRONMENTS, c.env.KV);
+    const blockBody = await generateEnvironmentTables(
+      ENVIRONMENTS,
+      c.env.ENVIRONMENT_RESERVATION,
+    );
 
     await fetch(c.env.SLACK_WEBHOOK_URL, {
       body: JSON.stringify({
@@ -122,7 +125,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     return c.text('OK');
   }
 
-  const status = await c.env.KV.get(environment);
+  const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
   if (!status) {
     await fetch(c.env.SLACK_WEBHOOK_URL, {
       body: JSON.stringify({

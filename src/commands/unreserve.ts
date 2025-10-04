@@ -35,7 +35,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     return c.text('OK');
   }
 
-  const meta = await c.env.KV.get(environment);
+  const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
 
   if (!meta) {
     await fetch(c.env.SLACK_WEBHOOK_URL, {
@@ -84,7 +84,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     return c.text('OK');
   }
 
-  await c.env.KV.delete(environment);
+  await c.env.ENVIRONMENT_RESERVATION.delete(environment);
 
   await fetch(c.env.SLACK_WEBHOOK_URL, {
     body: JSON.stringify({

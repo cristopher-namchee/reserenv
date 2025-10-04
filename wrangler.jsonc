@@ -16,8 +16,8 @@
 	},
 	"kv_namespaces": [
 		{
-			"binding": "KV",
-			"id": ""
+			"binding": "ENVIRONMENT_RESERVATION",
+			"id": "124200a3d29746f3ac0951a64ca549c7"
 		}
 	]
 	/**

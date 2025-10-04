@@ -35,7 +35,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     return c.text('OK');
   }
 
-  const meta = await c.env.KV.get(environment);
+  const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
   if (meta) {
     const { id } = JSON.parse(meta);
 
@@ -65,7 +65,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     id: user_id,
     since: new Date().toISOString(),
   });
-  await c.env.KV.put(environment, newMeta);
+  await c.env.ENVIRONMENT_RESERVATION.put(environment, newMeta);
 
   await fetch(c.env.SLACK_WEBHOOK_URL, {
     body: JSON.stringify({
