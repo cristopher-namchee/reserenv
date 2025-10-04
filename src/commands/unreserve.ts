@@ -51,7 +51,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `You cannot unreserve \`${environment}\` as it is being reserved by <@U${id}>`,
+            text: `You cannot unreserve \`${environment}\` as it is being reserved by <@${id}>`,
           },
         },
       ],

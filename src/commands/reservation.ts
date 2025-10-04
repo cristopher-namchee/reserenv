@@ -39,7 +39,7 @@ async function generateEnvironmentTables(
   const reservedBy = [
     textBlock('Reserved By', true),
     ...envData.map(({ meta }) =>
-      meta ? textBlock(`<@U${meta.id}>`) : textBlock('-'),
+      meta ? textBlock(`<@${meta.id}>`) : textBlock('-'),
     ),
   ];
 
@@ -135,7 +135,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `Environment \`${environment}\` is being reserved by <@U${meta.id}> since ${new Date(
+          text: `Environment \`${environment}\` is being reserved by <@${meta.id}> since ${new Date(
             meta.since,
           ).toLocaleDateString('en-GB', {
             year: 'numeric',

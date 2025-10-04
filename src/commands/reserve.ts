@@ -37,7 +37,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `Environment ${environment} is still being reserved by <@U${id}>. Please ask the user to unreserve it first.`,
+            text: `Environment ${environment} is still being reserved by <@${id}>. Please ask the user to unreserve it first.`,
           },
         },
       ],
