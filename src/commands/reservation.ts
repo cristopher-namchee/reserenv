@@ -76,7 +76,9 @@ async function generateEnvironmentTables(
 }
 
 export default async function (c: Context<{ Bindings: Bindings }>) {
-  const { text } = await c.req.parseBody();
+  const { text, user_id } = await c.req.parseBody();
+
+  console.log(user_id);
 
   let environment = '';
   if (typeof text === 'string') {
