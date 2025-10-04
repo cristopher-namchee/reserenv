@@ -91,6 +91,8 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
       c.env.ENVIRONMENT_RESERVATION,
     );
 
+    console.log(blockBody);
+
     return c.json({
       blocks: blockBody,
       response_type: 'ephemeral',
@@ -120,7 +122,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `Environment ${environment} is unused. You may reserve it with \`/reserve\` command`,
+            text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
           },
         },
       ],
@@ -136,7 +138,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `Environment ${environment} is being reserved by <@U${meta.id}> since ${new Date(
+          text: `Environment \`${environment}\` is being reserved by <@U${meta.id}> since ${new Date(
             meta.since,
           ).toLocaleDateString('en-GB', {
             year: 'numeric',
