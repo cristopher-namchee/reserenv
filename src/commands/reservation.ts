@@ -93,7 +93,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
       c.env.ENVIRONMENT_RESERVATION,
     );
 
-    console.log(blockBody);
+    console.log(JSON.stringify(blockBody, null, 2));
 
     return c.json({
       ...blockBody,
