@@ -31,9 +31,8 @@ async function generateEnvironmentTables(
     }),
   );
 
-  // Build rows
   const headers = [
-    textBlock('', false),
+    textBlock(' ', false),
     ...environments.map((env) => textBlock(env, true)),
   ];
 
@@ -85,15 +84,11 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     environment = params[0].trim();
   }
 
-  console.log(environment.length);
-
   if (!environment) {
     const blockBody = await generateEnvironmentTables(
       ENVIRONMENTS,
       c.env.ENVIRONMENT_RESERVATION,
     );
-
-    console.log(JSON.stringify(blockBody, null, 2));
 
     return c.json({
       ...blockBody,
