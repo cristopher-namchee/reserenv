@@ -91,90 +91,61 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
       c.env.ENVIRONMENT_RESERVATION,
     );
 
-    await fetch(c.env.SLACK_WEBHOOK_URL, {
-      body: JSON.stringify({
-        block: blockBody,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }),
+    return c.json({
+      blocks: blockBody,
+      response_type: 'ephemeral',
     });
   }
 
   if (!ENVIRONMENTS.includes(environment)) {
-    await fetch(c.env.SLACK_WEBHOOK_URL, {
-      body: JSON.stringify({
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: "The specified environment doesn't exist!",
-            },
-          },
-        ],
-        response_type: 'ephemeral',
-      }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return c.text('OK');
-  }
-
-  const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
-  if (!status) {
-    await fetch(c.env.SLACK_WEBHOOK_URL, {
-      body: JSON.stringify({
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `Environment ${environment} is unused. You may reserve it with \`/reserve\` command`,
-            },
-          },
-        ],
-        response_type: 'ephemeral',
-      }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return c.text('OK');
-  }
-
-  const meta = JSON.parse(status);
-
-  await fetch(c.env.SLACK_WEBHOOK_URL, {
-    body: JSON.stringify({
+    return c.json({
       blocks: [
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `Environment ${environment} is being reserved by <@U${meta.id}> since ${new Date(
-              meta.since,
-            ).toLocaleDateString('en-GB', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}`,
+            text: "The specified environment doesn't exist!",
           },
         },
       ],
       response_type: 'ephemeral',
-    }),
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+    });
+  }
 
-  return c.text('OK');
+  const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
+  if (!status) {
+    return c.json({
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `Environment ${environment} is unused. You may reserve it with \`/reserve\` command`,
+          },
+        },
+      ],
+      response_type: 'ephemeral',
+    });
+  }
+
+  const meta = JSON.parse(status);
+
+  return c.json({
+    blocks: [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `Environment ${environment} is being reserved by <@U${meta.id}> since ${new Date(
+            meta.since,
+          ).toLocaleDateString('en-GB', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}`,
+        },
+      },
+    ],
+    response_type: 'ephemeral',
+  });
 }

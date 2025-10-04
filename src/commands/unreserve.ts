@@ -13,97 +13,64 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
   const environment = params[0];
 
   if (!ENVIRONMENTS.includes(environment)) {
-    await fetch(c.env.SLACK_WEBHOOK_URL, {
-      body: JSON.stringify({
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: "The specified environment doesn't exist!",
-            },
-          },
-        ],
-        response_type: 'ephemeral',
-      }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return c.text('OK');
-  }
-
-  const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
-
-  if (!meta) {
-    await fetch(c.env.SLACK_WEBHOOK_URL, {
-      body: JSON.stringify({
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `Environment \`${environment}\` is not being reserved.`,
-            },
-          },
-        ],
-        response_type: 'ephemeral',
-      }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return c.text('OK');
-  }
-
-  const { id } = JSON.parse(meta);
-  if (id !== user_id) {
-    await fetch(c.env.SLACK_WEBHOOK_URL, {
-      body: JSON.stringify({
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `You cannot unreserve \`${environment}\` as it is being reserved by <@U${id}>`,
-            },
-          },
-        ],
-        response_type: 'ephemeral',
-      }),
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return c.text('OK');
-  }
-
-  await c.env.ENVIRONMENT_RESERVATION.delete(environment);
-
-  await fetch(c.env.SLACK_WEBHOOK_URL, {
-    body: JSON.stringify({
+    return c.json({
       blocks: [
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `Environment \`${environment}\` has been successfully unreserved`,
+            text: "The specified environment doesn't exist!",
           },
         },
       ],
       response_type: 'ephemeral',
-    }),
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+    });
+  }
 
-  return c.text('OK');
+  const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
+  if (!meta) {
+    return c.json({
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `Environment \`${environment}\` is not being reserved.`,
+          },
+        },
+      ],
+      response_type: 'ephemeral',
+    });
+  }
+
+  const { id } = JSON.parse(meta);
+  if (id !== user_id) {
+    return c.json({
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `You cannot unreserve \`${environment}\` as it is being reserved by <@U${id}>`,
+          },
+        },
+      ],
+      response_type: 'ephemeral',
+    });
+  }
+
+  await c.env.ENVIRONMENT_RESERVATION.delete(environment);
+
+  return c.json({
+    blocks: [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `Environment \`${environment}\` has been successfully unreserved`,
+        },
+      },
+    ],
+    response_type: 'ephemeral',
+  });
 }
