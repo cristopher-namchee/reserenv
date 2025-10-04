@@ -7,7 +7,6 @@ async function generateEnvironmentTables(
   environments: string[],
   kv: KVNamespace,
 ) {
-  // Helper for creating a text block
   const textBlock = (text: string, bold = false) => ({
     type: 'rich_text',
     elements: [
@@ -24,7 +23,6 @@ async function generateEnvironmentTables(
     ],
   });
 
-  // Fetch all KV values in parallel
   const envData = await Promise.all(
     environments.map(async (env) => {
       const user = await kv.get(env);
@@ -113,6 +111,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
             },
           },
         ],
+        response_type: 'ephemeral',
       }),
       method: 'POST',
       headers: {
@@ -136,6 +135,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
             },
           },
         ],
+        response_type: 'ephemeral',
       }),
       method: 'POST',
       headers: {
@@ -165,6 +165,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
           },
         },
       ],
+      response_type: 'ephemeral',
     }),
     method: 'POST',
     headers: {

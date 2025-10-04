@@ -12,4 +12,13 @@ app.post('/commands/reserve', reserve);
 app.post('/commands/unreserve', unreserve);
 app.post('/commands/reservation', reservation);
 
+app.onError((_e, c) => {
+  return c.json(
+    {
+      message: 'Unable to handle webhook',
+    },
+    500,
+  );
+});
+
 export default app;

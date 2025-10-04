@@ -24,6 +24,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
             },
           },
         ],
+        response_type: 'ephemeral',
       }),
       method: 'POST',
       headers: {
@@ -49,6 +50,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
             },
           },
         ],
+        response_type: 'ephemeral',
       }),
       method: 'POST',
       headers: {
@@ -76,6 +78,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
           },
         },
       ],
+      response_type: 'ephemeral',
     }),
     method: 'POST',
     headers: {
