@@ -93,6 +93,8 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
       c.env.ENVIRONMENT_RESERVATION,
     );
 
+    console.log(blockBody);
+
     return c.json({
       ...blockBody,
       response_type: 'ephemeral',
