@@ -3,39 +3,45 @@ import type { Context } from 'hono';
 import { ENVIRONMENTS } from '../constants';
 import type { Bindings } from '../types';
 
+function generateTextBlock(text: string, bold = false) {
+  return {
+    type: 'rich_text',
+    elements: [
+      {
+        type: 'rich_text_section',
+        elements: [
+          {
+            type: 'text',
+            text,
+            ...(bold ? { style: { bold: true } } : {}),
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function generateUserBlock(user_id: string) {
+  return {
+    type: 'rich_text',
+    elements: [
+      {
+        type: 'rich_text_section',
+        elements: [
+          {
+            type: 'user',
+            user_id,
+          },
+        ],
+      },
+    ],
+  };
+}
+
 async function generateEnvironmentTables(
   environments: string[],
   kv: KVNamespace,
 ) {
-  const textBlock = (text: string, bold = false) => {
-    const isMention = /^<@([A-Z0-9]+)>$/.test(text);
-    const mentionMatch = text.match(/^<@([A-Z0-9]+)>$/);
-
-    return {
-      type: 'rich_text',
-      elements: [
-        {
-          type: 'rich_text_section',
-          elements:
-            isMention && mentionMatch
-              ? [
-                  {
-                    type: 'user',
-                    user_id: mentionMatch[1],
-                  },
-                ]
-              : [
-                  {
-                    type: 'text',
-                    text,
-                    ...(bold ? { style: { bold: true } } : {}),
-                  },
-                ],
-        },
-      ],
-    };
-  };
-
   const envData = await Promise.all(
     environments.map(async (env) => {
       const user = await kv.get(env);
@@ -45,29 +51,29 @@ async function generateEnvironmentTables(
   );
 
   const headers = [
-    textBlock(' ', false),
-    ...environments.map((env) => textBlock(env, true)),
+    generateTextBlock(' ', false),
+    ...environments.map((env) => generateTextBlock(env, true)),
   ];
 
   const reservedBy = [
-    textBlock('Reserved By', true),
+    generateTextBlock('Reserved By', true),
     ...envData.map(({ meta }) =>
-      meta ? textBlock(`<@${meta.id}>`) : textBlock('-'),
+      meta ? generateUserBlock(meta.id) : generateTextBlock('-'),
     ),
   ];
 
   const reservedSince = [
-    textBlock('Reserved Since', true),
+    generateTextBlock('Reserved Since', true),
     ...envData.map(({ meta }) =>
       meta
-        ? textBlock(
+        ? generateTextBlock(
             new Date(meta.since).toLocaleDateString('en-GB', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
             }),
           )
-        : textBlock('-'),
+        : generateTextBlock('-'),
     ),
   ];
 
@@ -102,8 +108,6 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
       ENVIRONMENTS,
       c.env.ENVIRONMENT_RESERVATION,
     );
-
-    console.log(JSON.stringify(blockBody, null, 2));
 
     return c.json({
       ...blockBody,
