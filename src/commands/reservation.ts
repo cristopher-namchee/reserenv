@@ -39,7 +39,7 @@ async function generateEnvironmentTables(
   const reservedBy = [
     textBlock('Reserved By', true),
     ...envData.map(({ meta }) =>
-      meta ? textBlock(`<@${meta.id}>`) : textBlock('-'),
+      meta ? textBlock(`<@${meta.id}|Cristopher>`) : textBlock('-'),
     ),
   ];
 
@@ -90,7 +90,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
       c.env.ENVIRONMENT_RESERVATION,
     );
 
-    console.log(blockBody);
+    console.log(JSON.stringify(blockBody, null, 2));
 
     return c.json({
       ...blockBody,
