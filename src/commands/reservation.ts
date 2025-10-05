@@ -7,21 +7,34 @@ async function generateEnvironmentTables(
   environments: string[],
   kv: KVNamespace,
 ) {
-  const textBlock = (text: string, bold = false) => ({
-    type: 'rich_text',
-    elements: [
-      {
-        type: 'rich_text_section',
-        elements: [
-          {
-            type: 'text',
-            text,
-            ...(bold ? { style: { bold: true } } : {}),
-          },
-        ],
-      },
-    ],
-  });
+  const textBlock = (text: string, bold = false) => {
+    const isMention = /^<@([A-Z0-9]+)>$/.test(text);
+    const mentionMatch = text.match(/^<@([A-Z0-9]+)>$/);
+
+    return {
+      type: 'rich_text',
+      elements: [
+        {
+          type: 'rich_text_section',
+          elements:
+            isMention && mentionMatch
+              ? [
+                  {
+                    type: 'user',
+                    user_id: mentionMatch[1],
+                  },
+                ]
+              : [
+                  {
+                    type: 'text',
+                    text,
+                    ...(bold ? { style: { bold: true } } : {}),
+                  },
+                ],
+        },
+      ],
+    };
+  };
 
   const envData = await Promise.all(
     environments.map(async (env) => {
@@ -39,7 +52,7 @@ async function generateEnvironmentTables(
   const reservedBy = [
     textBlock('Reserved By', true),
     ...envData.map(({ meta }) =>
-      meta ? textBlock(`<@${meta.id}|Cristopher>`) : textBlock('-'),
+      meta ? textBlock(`<@${meta.id}>`) : textBlock('-'),
     ),
   ];
 
