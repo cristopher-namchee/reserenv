@@ -10,22 +10,27 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
   }
 
   const params = text.split(/\s+/);
-  const environment = normalizeEnvironments(params)[0];
+  const environments = normalizeEnvironments(params);
 
-  if (!environment) {
+  if (environments.length !== 1) {
     return c.json({
       blocks: [
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: "The specified environment doesn't exist!",
+            text:
+              environments.length === 0
+                ? "The specified environment doesn't exist!"
+                : 'To avoid resource hogging, you **cannot** reserve more than 1 environment at once for now. Please reserve them one by one.',
           },
         },
       ],
       response_type: 'ephemeral',
     });
   }
+
+  const environment = environments[0];
 
   const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
   if (meta) {
@@ -37,7 +42,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `Environment ${environment} is still being reserved by <@${id}>. Please ask the user to unreserve it first.`,
+            text: `Environment \`${environment}\` is still being reserved by <@${id}>. Please ask the user to unreserve it first.`,
           },
         },
       ],
@@ -57,7 +62,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `Environment ${environment} successfully reserved.`,
+          text: `Environment \`${environment}\` successfully reserved.`,
         },
       },
     ],
