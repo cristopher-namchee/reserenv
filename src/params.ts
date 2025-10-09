@@ -11,6 +11,7 @@ const EnvironmentAlias: Record<string, (typeof Environments)[number]> = {
  * @returns {string[]} List of normalized environments
  */
 export function normalizeEnvironments(params: string[]): string[] {
+  console.log(params);
   return params
     .map((val) => (val in EnvironmentAlias ? EnvironmentAlias[val] : val))
     .map((val) => val.trim())
