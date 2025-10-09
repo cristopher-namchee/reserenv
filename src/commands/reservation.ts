@@ -103,6 +103,8 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     environments.push(...params);
   }
 
+  console.log(environments.length);
+
   if (!environments.length) {
     const blockBody = await generateEnvironmentTables(
       ENVIRONMENTS,
@@ -126,7 +128,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: "The specified environment doesn't exist!",
+            text: "The specified environment(s) doesn't exist!",
           },
         },
       ],
