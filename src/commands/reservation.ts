@@ -97,7 +97,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
   const { text } = await c.req.parseBody();
 
   if (typeof text !== 'string') {
-    return;
+    return c.notFound();
   }
 
   if (!text.trim()) {
