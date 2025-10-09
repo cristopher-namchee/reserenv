@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 
-import { ENVIRONMENTS } from '../constants';
+import { normalizeEnvironments } from '../params';
 import type { Bindings } from '../types';
 
 export default async function (c: Context<{ Bindings: Bindings }>) {
@@ -10,9 +10,9 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
   }
 
   const params = text.split(/\s+/);
-  const environment = params[0].trim();
+  const environment = normalizeEnvironments(params)[0];
 
-  if (!ENVIRONMENTS.includes(environment)) {
+  if (!environment) {
     return c.json({
       blocks: [
         {

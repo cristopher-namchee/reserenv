@@ -1,6 +1,5 @@
 import type { Context } from 'hono';
-
-import { ENVIRONMENTS } from '../constants';
+import { Environments, normalizeEnvironments } from '../params';
 import type { Bindings } from '../types';
 
 function generateTextBlock(text: string, bold = false) {
@@ -97,17 +96,13 @@ async function generateEnvironmentTables(
 export default async function (c: Context<{ Bindings: Bindings }>) {
   const { text } = await c.req.parseBody();
 
-  const environments = [];
-  if (typeof text === 'string') {
-    const params = text.trim().split(/\s+/).filter(Boolean);
-    environments.push(...params);
+  if (typeof text !== 'string') {
+    return;
   }
 
-  console.log(environments.length, JSON.stringify(environments, null, 2));
-
-  if (!environments.length) {
+  if (!text.trim()) {
     const blockBody = await generateEnvironmentTables(
-      ENVIRONMENTS,
+      Environments,
       c.env.ENVIRONMENT_RESERVATION,
     );
 
@@ -117,11 +112,9 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     });
   }
 
-  const validEnvironments = environments.filter((env) =>
-    ENVIRONMENTS.includes(env),
-  );
+  const environments = normalizeEnvironments(text.split(/\s+/));
 
-  if (validEnvironments.length === 0) {
+  if (environments.length === 0) {
     return c.json({
       blocks: [
         {
@@ -136,8 +129,8 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     });
   }
 
-  if (validEnvironments.length === 1) {
-    const environment = validEnvironments[0];
+  if (environments.length === 1) {
+    const environment = environments[0];
 
     const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
 
@@ -179,7 +172,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
   }
 
   const blockBody = await generateEnvironmentTables(
-    validEnvironments,
+    environments,
     c.env.ENVIRONMENT_RESERVATION,
   );
 
