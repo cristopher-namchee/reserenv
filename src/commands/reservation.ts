@@ -99,7 +99,7 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
 
   const environments = [];
   if (typeof text === 'string') {
-    const params = text.trim().split(/\s+/);
+    const params = text.trim().split(/\s+/).filter(Boolean);
     environments.push(...params);
   }
 
