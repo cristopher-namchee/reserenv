@@ -103,6 +103,8 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     environments.push(...params);
   }
 
+  console.log(environments.length, JSON.stringify(environments, null, 2));
+
   if (!environments.length) {
     const blockBody = await generateEnvironmentTables(
       ENVIRONMENTS,
