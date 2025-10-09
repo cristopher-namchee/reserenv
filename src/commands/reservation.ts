@@ -99,11 +99,9 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
 
   const environments = [];
   if (typeof text === 'string') {
-    const params = text.split(/\s+/);
+    const params = text.trim().split(/\s+/);
     environments.push(...params);
   }
-
-  console.log(environments.length);
 
   if (!environments.length) {
     const blockBody = await generateEnvironmentTables(
