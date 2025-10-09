@@ -97,13 +97,13 @@ async function generateEnvironmentTables(
 export default async function (c: Context<{ Bindings: Bindings }>) {
   const { text } = await c.req.parseBody();
 
-  let environment = '';
+  const environments = [];
   if (typeof text === 'string') {
     const params = text.split(/\s+/);
-    environment = params[0].trim();
+    environments.push(...params);
   }
 
-  if (!environment) {
+  if (!environments.length) {
     const blockBody = await generateEnvironmentTables(
       ENVIRONMENTS,
       c.env.ENVIRONMENT_RESERVATION,
@@ -115,7 +115,11 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     });
   }
 
-  if (!ENVIRONMENTS.includes(environment)) {
+  const validEnvironments = environments.filter((env) =>
+    ENVIRONMENTS.includes(env),
+  );
+
+  if (validEnvironments.length === 0) {
     return c.json({
       blocks: [
         {
@@ -130,15 +134,41 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     });
   }
 
-  const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
-  if (!status) {
+  if (validEnvironments.length === 1) {
+    const environment = validEnvironments[0];
+
+    const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
+
+    if (!status) {
+      return c.json({
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
+            },
+          },
+        ],
+        response_type: 'ephemeral',
+      });
+    }
+
+    const meta = JSON.parse(status);
+
     return c.json({
       blocks: [
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
+            text: `Environment \`${environment}\` is being reserved by <@${meta.id}> since ${new Date(
+              meta.since,
+            ).toLocaleDateString('en-GB', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}`,
           },
         },
       ],
@@ -146,24 +176,13 @@ export default async function (c: Context<{ Bindings: Bindings }>) {
     });
   }
 
-  const meta = JSON.parse(status);
+  const blockBody = await generateEnvironmentTables(
+    validEnvironments,
+    c.env.ENVIRONMENT_RESERVATION,
+  );
 
   return c.json({
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `Environment \`${environment}\` is being reserved by <@${meta.id}> since ${new Date(
-            meta.since,
-          ).toLocaleDateString('en-GB', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}`,
-        },
-      },
-    ],
+    ...blockBody,
     response_type: 'ephemeral',
   });
 }
