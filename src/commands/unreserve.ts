@@ -1,8 +1,8 @@
 import type { Context } from 'hono';
 import { normalizeEnvironments } from '../params';
-import type { Bindings } from '../types';
+import type { Env } from '../types';
 
-export default async function (c: Context<{ Bindings: Bindings }>) {
+export default async function (c: Context<{ Bindings: Env }>) {
   const { text, user_id } = await c.req.parseBody();
   if (typeof text !== 'string' || !text || !user_id) {
     return c.notFound();

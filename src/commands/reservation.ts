@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import { Environments, normalizeEnvironments } from '../params';
-import type { Bindings } from '../types';
+import type { Env } from '../types';
 
 function generateTextBlock(text: string, bold = false) {
   return {
@@ -93,7 +93,7 @@ async function generateEnvironmentTables(
   };
 }
 
-export default async function (c: Context<{ Bindings: Bindings }>) {
+export default async function (c: Context<{ Bindings: Env }>) {
   const { text } = await c.req.parseBody();
 
   if (typeof text !== 'string') {
