@@ -25,7 +25,11 @@ app.onError((_e, c) => {
 
 export default {
   fetch: app.fetch,
-  scheduled: (_: ScheduledController, env: Env, ctx: ExecutionContext) => {
+  scheduled: async (
+    _: ScheduledController,
+    env: Env,
+    ctx: ExecutionContext,
+  ) => {
     ctx.waitUntil(sendReminder(env));
   },
 };
