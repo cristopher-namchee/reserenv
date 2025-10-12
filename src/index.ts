@@ -4,6 +4,8 @@ import reservation from './commands/reservation';
 import reserve from './commands/reserve';
 import unreserve from './commands/unreserve';
 
+import sendReminder from './reminder';
+
 import type { Env } from './types';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -23,11 +25,7 @@ app.onError((_e, c) => {
 
 export default {
   fetch: app.fetch,
-  scheduled: (
-    controller: ScheduledController,
-    env: Env,
-    ctx: ExecutionContext,
-  ) => {
-    ctx.waitUntil();
+  scheduled: (_: ScheduledController, env: Env, ctx: ExecutionContext) => {
+    ctx.waitUntil(sendReminder(env));
   },
 };
