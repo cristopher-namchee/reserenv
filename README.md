@@ -42,4 +42,4 @@ Unlikely to fail.
 
 ## License
 
-This project is licensed under the [Unlicensed](./LICENSE).
+This project is licensed under the [Unlicense](./LICENSE).
