@@ -7,10 +7,6 @@
 	"name": "reserenv",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-10-01",
-	"assets": {
-		"binding": "ASSETS",
-		"directory": "./public"
-	},
 	"observability": {
 		"enabled": true
 	},
