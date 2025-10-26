@@ -3,7 +3,7 @@
 A slack bot that shows GLChat environment usage.
 
 > [!WARNING]
-> This bot doesn't correctly synchronize with infra. Therefore, the environment user might be inaccurate!
+> This bot doesn't correctly synchronize with infrastructure conditions. Therefore, the environment user might be inaccurate!
 
 ## Supported Environments
 
