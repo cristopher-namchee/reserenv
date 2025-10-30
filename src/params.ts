@@ -1,4 +1,4 @@
-export const Environments = ['dev', 'dev2', 'dev3'];
+export const Environments = ['dev', 'dev2', 'dev3', 'stag'];
 const EnvironmentAlias: Record<string, (typeof Environments)[number]> = {
   dev1: 'dev',
 };
