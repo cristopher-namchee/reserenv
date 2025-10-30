@@ -7,9 +7,12 @@ A slack bot that shows GLChat environment usage.
 
 ## Supported Environments
 
-1. `dev`
-2. `dev2`
-3. `dev3`
+| Environment | Alias |
+| ----------- | ----- |
+| `dev` | `dev1` |
+| `dev2` | - |
+| `dev3` | - |
+| `stag` | - |
 
 > [!NOTE]
 > Other env(s) support will be decided later.
