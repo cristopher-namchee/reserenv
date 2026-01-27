@@ -4,7 +4,10 @@
 	"scripts": {
 		"dev": "wrangler dev",
 		"deploy": "wrangler deploy --minify",
-		"cf-typegen": "wrangler types --env-interface CloudflareBindings"
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
+		"lint": "biome lint ./src",
+		"format": "biome format ./src",
+		"test": "vitest"
 	},
 	"dependencies": {
 		"hono": "^4.9.9"

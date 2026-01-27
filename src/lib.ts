@@ -1,7 +1,7 @@
 import { sign } from 'hono/jwt';
 
 import { JWT } from './const';
-import { JWTResponse } from './types';
+import type { JWTResponse } from './types';
 
 /**
  * Get auth token that can be used to interact with Google Chat API
