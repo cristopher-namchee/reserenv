@@ -10,7 +10,8 @@ import {
   it,
   vi,
 } from 'vitest';
-import { getGoogleAuthToken } from './lib';
+import { Environments } from './const';
+import { getGoogleAuthToken, normalizeEnvironments } from './lib';
 
 const mockServer = setupServer();
 
@@ -79,7 +80,7 @@ describe('getGoogleAuthToken', () => {
   it('should resolve into empty string when access token is empty', async () => {
     mockServer.use(
       http.post('https://oauth2.googleapis.com/token', async () => {
-        return HttpResponse.json({ });
+        return HttpResponse.json({});
       }),
     );
 
@@ -110,5 +111,48 @@ describe('getGoogleAuthToken', () => {
 
     expect(result).toBe('token');
     expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe('normalizeEnvironments', () => {
+  it('returns empty array for empty input', () => {
+    expect(normalizeEnvironments([])).toEqual([]);
+  });
+
+  it('keeps valid environments', () => {
+    expect(normalizeEnvironments(['dev', 'stag'])).toEqual(['dev', 'stag']);
+  });
+
+  it('applies environment aliases', () => {
+    expect(normalizeEnvironments(['dev1'])).toEqual(['dev']);
+  });
+
+  it('trims whitespace', () => {
+    expect(normalizeEnvironments([' dev ', ' stag '])).toEqual(['dev', 'stag']);
+  });
+
+  it('removes invalid environments', () => {
+    expect(normalizeEnvironments(['dev', 'prod', 'foo'])).toEqual(['dev']);
+  });
+
+  it('deduplicates environments', () => {
+    expect(normalizeEnvironments(['dev', 'dev', 'dev1'])).toEqual(['dev']);
+  });
+
+  it('sorts environments alphabetically', () => {
+    expect(normalizeEnvironments(['stag', 'dev3', 'dev'])).toEqual([
+      'dev',
+      'dev3',
+      'stag',
+    ]);
+  });
+
+  it('ignores empty or whitespace-only values', () => {
+    expect(normalizeEnvironments(['', '   ', 'dev'])).toEqual(['dev']);
+  });
+
+  it('only returns known environments', () => {
+    const result = normalizeEnvironments(['dev', 'dev2', 'dev3', 'stag']);
+    expect(result).toEqual([...Environments].sort());
   });
 });

@@ -4,7 +4,7 @@ import reservation from './commands/reservation';
 import reserve from './commands/reserve';
 import unreserve from './commands/unreserve';
 
-import sendReminder from './reminder';
+import sendReminder from './scheduler/reminder';
 
 import type { Env, GoogleChatEvent } from './types';
 

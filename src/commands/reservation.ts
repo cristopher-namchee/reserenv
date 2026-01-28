@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
-
-import { Environments, normalizeEnvironments } from '../params';
+import { Environments } from '../const';
+import { normalizeEnvironments } from '../lib';
 import type { Env, GoogleChatEvent } from '../types';
 
 async function generateEnvironmentCards(

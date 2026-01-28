@@ -1,6 +1,7 @@
-import { getGoogleAuthToken } from './lib';
-import { Environments } from './params';
-import type { Env } from './types';
+import { Environments } from '../const';
+import { getGoogleAuthToken } from '../lib';
+
+import type { Env } from '../types';
 
 interface ReservationInfo {
   id: string;
@@ -42,11 +43,18 @@ export default async function (env: Env) {
       
 Hello! This is a friendly reminder that you still have the following environment(s) reserved:
 
-${reservations.map(({ environment, since }, idx) => `${idx + 1}. \`${environment}\`, _since ${new Date(since).toLocaleDateString('en-GB', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-})}_`).join('\n')}
+${reservations
+  .map(
+    ({ environment, since }, idx) =>
+      `${idx + 1}. \`${environment}\`, _since ${new Date(
+        since,
+      ).toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })}_`,
+  )
+  .join('\n')}
 
 **⏳ If you are still using the environment(s)**
 
@@ -61,19 +69,16 @@ Please don't forget to unreserve the environment(s) with the \`/unreserve\` comm
 - Clean temporary files
 `;
 
-      await fetch(
-        `https://chat.googleapis.com/v1/${key}/messages`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            formattedText: text, // This is the message the user sees
-          }),
+      await fetch(`https://chat.googleapis.com/v1/${key}/messages`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({
+          formattedText: text, // This is the message the user sees
+        }),
+      });
     }),
   );
 }

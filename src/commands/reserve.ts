@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 
-import { normalizeEnvironments } from '../params';
+import { normalizeEnvironments } from '../lib';
 import type { Env, GoogleChatEvent } from '../types';
 
 export default async function (c: Context<{ Bindings: Env }>) {

@@ -1,4 +1,4 @@
-import { JWT } from './const';
+import { Environments, JWT } from './const';
 
 import type { GoogleAuthResponse } from './types';
 
@@ -30,11 +30,36 @@ function pemToArrayBuffer(pem: string) {
   return bytes.buffer;
 }
 
+const EnvironmentAlias: Record<string, (typeof Environments)[number]> = {
+  dev1: 'dev',
+};
+
+/**
+ * Normalize possible parameters by applying alias and removing
+ * unidentifiable environments.
+ *
+ * @param {string[]} params Command parameters
+ * @returns {string[]} List of normalized environments
+ */
+export function normalizeEnvironments(params: string[]): string[] {
+  return [
+    ...new Set(
+      params
+        .map((val) => (val in EnvironmentAlias ? EnvironmentAlias[val] : val))
+        .map((val) => val.trim())
+        .filter(Boolean)
+        .filter((val) => Environments.includes(val)),
+    ),
+  ].sort();
+}
+
+
 /**
  * Get auth token that can be used to interact with Google Chat API
  * using the provided service account credentials.
  *
  * @param {string} email Service account e-mail
+ * @param {string} pem Service account private key
  * @returns {Promise<string>} Resolves into a string. If successful, it will
  * resolve into an access token. If not, it will resolve an empty string.
  */
