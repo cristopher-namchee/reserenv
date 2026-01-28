@@ -39,7 +39,7 @@ export default async function (env: Env) {
 
   await Promise.all(
     Object.entries(reservations).map(async ([key, reservations]) => {
-      const text = `**🔔 Environment Reservation Reminder**
+      const text = `*🔔 Environment Reservation Reminder*
       
 Hello! This is a friendly reminder that you still have the following environment(s) reserved:
 
@@ -56,11 +56,11 @@ ${reservations
   )
   .join('\n')}
 
-**⏳ If you are still using the environment(s)**
+*⏳ If you are still using the environment(s)*
 
 Feel free to ignore this message.
 
-**✅ If you have finished using the environment(s):**
+*✅ If you have finished using the environment(s):*
 
 Please don't forget to unreserve the environment(s) with the \`/unreserve\` command and apply appropriate cleanup procedures such as:
 

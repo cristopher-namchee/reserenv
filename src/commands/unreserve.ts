@@ -18,7 +18,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
       formattedText:
         environments.length === 0
           ? "The specified environment doesn't exist!"
-          : 'To avoid accidents, you **cannot** unreserve more than 1 environment at once. Please unreserve them one by one.',
+          : 'To avoid accidents, you *cannot* unreserve more than 1 environment at once. Please unreserve them one by one.',
     });
   }
 

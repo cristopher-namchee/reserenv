@@ -19,7 +19,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
       formattedText:
         environments.length === 0
           ? "The specified environment doesn't exist!"
-          : 'To avoid resource hogging, you **cannot** reserve more than 1 environment at once for now. Please reserve them one by one.',
+          : 'To avoid resource hogging, you *cannot* reserve more than 1 environment at once for now. Please reserve them one by one.',
     });
   }
 
