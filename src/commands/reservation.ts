@@ -15,6 +15,7 @@ async function generateEnvironmentCards(
     }),
   );
   return {
+    formattedText: 'Below are the list of the reservation status.',
     cardsV2: envData.map(({ env, meta }) => ({
       cardId: `card-${env}`,
       card: {
@@ -83,7 +84,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
   if (environments.length === 0) {
     return c.json({
       privateMessageViewer: user,
-      text: "The specified environment(s) doesn't exist!",
+      formattedText: "The specified environment(s) doesn't exist!",
     });
   }
 
@@ -95,7 +96,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
     if (!status) {
       return c.json({
         privateMessageViewer: user,
-        text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
+        formattedText: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
       });
     }
 
@@ -103,7 +104,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     return c.json({
       privateMessageViewer: user,
-      text: `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
+      formattedText: `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
         meta.since,
       ).toLocaleDateString('en-GB', {
         year: 'numeric',

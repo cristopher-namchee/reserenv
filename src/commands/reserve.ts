@@ -16,7 +16,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
   if (environments.length !== 1) {
     return c.json({
       privateMessageViewer: user,
-      text:
+      formattedText:
         environments.length === 0
           ? "The specified environment doesn't exist!"
           : 'To avoid resource hogging, you **cannot** reserve more than 1 environment at once for now. Please reserve them one by one.',
@@ -31,7 +31,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     return c.json({
       privateMessageViewer: user,
-      text: `Environment \`${environment}\` is still being reserved by <${id}>. Please ask the user to unreserve it first.`,
+      formattedText: `Environment \`${environment}\` is still being reserved by <${id}>. Please ask the user to unreserve it first.`,
     });
   }
 
@@ -43,6 +43,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   return c.json({
     privateMessageViewer: user,
-    text: `Environment \`${environment}\` successfully reserved.`,
+    formattedText: `Environment \`${environment}\` successfully reserved.`,
   });
 }

@@ -15,7 +15,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
   if (environments.length !== 1) {
     return c.json({
       privateMessageViewer: user,
-      text:
+      formattedText:
         environments.length === 0
           ? "The specified environment doesn't exist!"
           : 'To avoid accidents, you **cannot** unreserve more than 1 environment at once. Please unreserve them one by one.',
@@ -28,7 +28,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
   if (!meta) {
     return c.json({
       privateMessageViewer: user,
-      text: `Environment \`${environment}\` is not being reserved.`,
+      formattedText: `Environment \`${environment}\` is not being reserved.`,
     });
   }
 
@@ -36,7 +36,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
   if (id !== user.name) {
     return c.json({
       privateMessageViewer: user,
-      text: `You cannot unreserve \`${environment}\` as it is being reserved by <@${id}>`,
+      formattedText: `You cannot unreserve \`${environment}\` as it is being reserved by <@${id}>`,
     });
   }
 
@@ -44,6 +44,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   return c.json({
     privateMessageViewer: user,
-    text: `Environment \`${environment}\` has been successfully unreserved`,
+    formattedText: `Environment \`${environment}\` has been successfully unreserved`,
   });
 }
