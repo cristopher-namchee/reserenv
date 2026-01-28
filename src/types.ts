@@ -6,8 +6,6 @@ export interface Env {
   SERVICE_ACCOUNT_PRIVATE_KEY: string;
 }
 
-export interface GoogleServiceAccount {
-  private_key: string;
-  client_email: string;
-  token_uri: string;
+export interface GoogleAuthResponse {
+  access_token: string;
 }
