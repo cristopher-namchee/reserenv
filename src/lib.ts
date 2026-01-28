@@ -93,6 +93,10 @@ export async function getGoogleAuthToken(
 
     const body = (await response.json()) as GoogleAuthResponse;
 
+    if (!body.access_token) {
+      throw new Error('Access token is empty');
+    }
+
     return body.access_token;
   } catch (err) {
     console.error('Failed to get access token from Google:', err);

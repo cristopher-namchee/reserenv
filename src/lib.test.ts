@@ -76,6 +76,24 @@ describe('getGoogleAuthToken', () => {
     expect(spy).toHaveBeenCalledOnce();
   });
 
+  it('should resolve into empty string when access token is empty', async () => {
+    mockServer.use(
+      http.post('https://oauth2.googleapis.com/token', async () => {
+        return HttpResponse.json({ });
+      }),
+    );
+
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const result = await getGoogleAuthToken(
+      mockServiceAccount.client_email,
+      mockServiceAccount.private_key,
+    );
+
+    expect(result).toBe('');
+    expect(spy).toHaveBeenCalledOnce();
+  });
+
   it('should resolve into an access token', async () => {
     mockServer.use(
       http.post('https://oauth2.googleapis.com/token', async () => {

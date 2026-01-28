@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
 
 import reservation from './commands/reservation';
 import reserve from './commands/reserve';
@@ -6,13 +6,37 @@ import unreserve from './commands/unreserve';
 
 import sendReminder from './reminder';
 
-import type { Env } from './types';
+import type { Env, GoogleChatEvent } from './types';
+
+const commandMap: Record<
+  string,
+  (c: Context<{ Bindings: Env }>) => Promise<Response>
+> = {
+  '1': reservation,
+  '2': reserve,
+  '3': unreserve,
+};
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.post('/commands/reserve', reserve);
-app.post('/commands/unreserve', unreserve);
-app.post('/commands/reservation', reservation);
+// Google Chat
+app.post('/', async (c) => {
+  const event = (await c.req.json()) as GoogleChatEvent;
+
+  if (event.user.type === 'BOT') {
+    return c.json({});
+  }
+
+  if (
+    event.type === 'MESSAGE' &&
+    event.message?.slashCommand &&
+    commandMap[event.message.slashCommand.commandId]
+  ) {
+    return commandMap[event.message.slashCommand.commandId](c);
+  }
+
+  return c.json({});
+});
 
 app.onError((_e, c) => {
   return c.json(
