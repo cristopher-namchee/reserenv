@@ -89,9 +89,6 @@ export async function getGoogleAuthToken(
     });
 
     if (!response.ok) {
-      const body = await response.json();
-
-      console.log(JSON.stringify(body, null, 2));
       throw new Error(`Response returned ${response.status}`);
     }
 
