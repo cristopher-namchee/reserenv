@@ -1,43 +1,9 @@
 import type { Context } from 'hono';
-import { Environments, normalizeEnvironments } from '../params';
-import type { Env } from '../types';
+import { Environments } from '../const';
+import { normalizeEnvironments } from '../lib/env';
+import type { Env, GoogleChatEvent } from '../types';
 
-function generateTextBlock(text: string, bold = false) {
-  return {
-    type: 'rich_text',
-    elements: [
-      {
-        type: 'rich_text_section',
-        elements: [
-          {
-            type: 'text',
-            text,
-            ...(bold ? { style: { bold: true } } : {}),
-          },
-        ],
-      },
-    ],
-  };
-}
-
-function generateUserBlock(user_id: string) {
-  return {
-    type: 'rich_text',
-    elements: [
-      {
-        type: 'rich_text_section',
-        elements: [
-          {
-            type: 'user',
-            user_id,
-          },
-        ],
-      },
-    ],
-  };
-}
-
-async function generateEnvironmentTables(
+async function generateEnvironmentCards(
   environments: string[],
   kv: KVNamespace,
 ) {
@@ -49,83 +15,77 @@ async function generateEnvironmentTables(
     }),
   );
 
-  const headers = [
-    generateTextBlock(' ', false),
-    ...environments.map((env) => generateTextBlock(env, true)),
-  ];
-
-  const reservedBy = [
-    generateTextBlock('Reserved By', true),
-    ...envData.map(({ meta }) =>
-      meta ? generateUserBlock(meta.id) : generateTextBlock('-'),
-    ),
-  ];
-
-  const reservedSince = [
-    generateTextBlock('Reserved Since', true),
-    ...envData.map(({ meta }) =>
-      meta
-        ? generateTextBlock(
-            new Date(meta.since).toLocaleDateString('en-GB', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            }),
-          )
-        : generateTextBlock('-'),
-    ),
-  ];
-
   return {
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: 'Below are the list of available GLChat development environments.',
+    text: 'Below are the list of the reservation status.',
+    cardsV2: envData.map(({ env, meta }) => ({
+      cardId: `card-${env}`,
+      card: {
+        header: {
+          title: env,
+          subtitle: 'GLChat Development Environment',
         },
+        sections: [
+          {
+            collapsible: false,
+            widgets: [
+              {
+                decoratedText: {
+                  topLabel: 'Reserved By',
+                  startIcon: {
+                    knownIcon: 'EMAIL',
+                  },
+                  text: meta ? `<${meta.id}>` : '-',
+                },
+              },
+              {
+                decoratedText: {
+                  topLabel: 'Reserved Since',
+                  startIcon: {
+                    knownIcon: 'CLOCK',
+                  },
+                  text: meta
+                    ? new Date(meta.since).toLocaleDateString('en-GB', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })
+                    : '-',
+                },
+              },
+            ],
+          },
+        ],
       },
-      {
-        type: 'table',
-        rows: [headers, reservedBy, reservedSince],
-      },
-    ],
+    })),
   };
 }
 
 export default async function (c: Context<{ Bindings: Env }>) {
-  const { text } = await c.req.parseBody();
+  const { user, message } = (await c.req.json()) as GoogleChatEvent;
 
-  if (typeof text !== 'string') {
-    return c.notFound();
+  if (!message) {
+    return c.json({});
   }
 
-  if (!text.trim()) {
-    const blockBody = await generateEnvironmentTables(
+  if (!message.text.trim()) {
+    const blockBody = await generateEnvironmentCards(
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
     );
 
     return c.json({
+      privateMessageViewer: user,
       ...blockBody,
-      response_type: 'ephemeral',
     });
   }
 
-  const environments = normalizeEnvironments(text.split(/\s+/));
+  const [_, ...params] = message.text.split(/\s+/);
+  const environments = normalizeEnvironments(params);
 
   if (environments.length === 0) {
     return c.json({
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: "The specified environment(s) doesn't exist!",
-          },
-        },
-      ],
-      response_type: 'ephemeral',
+      privateMessageViewer: user,
+      text: "The specified environment(s) doesn't exist!",
     });
   }
 
@@ -136,48 +96,32 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     if (!status) {
       return c.json({
-        blocks: [
-          {
-            type: 'section',
-            text: {
-              type: 'mrkdwn',
-              text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
-            },
-          },
-        ],
-        response_type: 'ephemeral',
+        privateMessageViewer: user,
+        text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
       });
     }
 
     const meta = JSON.parse(status);
 
     return c.json({
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `Environment \`${environment}\` is being reserved by <@${meta.id}> since ${new Date(
-              meta.since,
-            ).toLocaleDateString('en-GB', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}`,
-          },
-        },
-      ],
-      response_type: 'ephemeral',
+      privateMessageViewer: user,
+      text: `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
+        meta.since,
+      ).toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })}`,
     });
   }
 
-  const blockBody = await generateEnvironmentTables(
+  const blockBody = await generateEnvironmentCards(
     environments,
     c.env.ENVIRONMENT_RESERVATION,
   );
 
   return c.json({
+    privateMessageViewer: user,
     ...blockBody,
-    response_type: 'ephemeral',
   });
 }

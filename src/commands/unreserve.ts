@@ -1,31 +1,24 @@
 import type { Context } from 'hono';
-import { normalizeEnvironments } from '../params';
-import type { Env } from '../types';
+import { normalizeEnvironments } from '../lib/env';
+import type { Env, GoogleChatEvent } from '../types';
 
 export default async function (c: Context<{ Bindings: Env }>) {
-  const { text, user_id } = await c.req.parseBody();
-  if (typeof text !== 'string' || !text || !user_id) {
-    return c.notFound();
+  const { user, message } = (await c.req.json()) as GoogleChatEvent;
+
+  if (!message) {
+    return c.json({});
   }
 
-  const params = text.split(/\s+/);
+  const [_, ...params] = message.text.split(/\s+/);
   const environments = normalizeEnvironments(params);
 
   if (environments.length !== 1) {
     return c.json({
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text:
-              environments.length === 0
-                ? "The specified environment doesn't exist!"
-                : 'To avoid accidents, you **cannot** unreserve more than 1 environment at once. Please unreserve them one by one.',
-          },
-        },
-      ],
-      response_type: 'ephemeral',
+      privateMessageViewer: user,
+      text:
+        environments.length === 0
+          ? "The specified environment doesn't exist!"
+          : 'To avoid accidents, you *cannot* unreserve more than 1 environment at once. Please unreserve them one by one.',
     });
   }
 
@@ -34,47 +27,23 @@ export default async function (c: Context<{ Bindings: Env }>) {
   const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
   if (!meta) {
     return c.json({
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `Environment \`${environment}\` is not being reserved.`,
-          },
-        },
-      ],
-      response_type: 'ephemeral',
+      privateMessageViewer: user,
+      text: `Environment \`${environment}\` is not being reserved.`,
     });
   }
 
   const { id } = JSON.parse(meta);
-  if (id !== user_id) {
+  if (id !== user.name) {
     return c.json({
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `You cannot unreserve \`${environment}\` as it is being reserved by <@${id}>`,
-          },
-        },
-      ],
-      response_type: 'ephemeral',
+      privateMessageViewer: user,
+      text: `You cannot unreserve \`${environment}\` as it is being reserved by <@${id}>`,
     });
   }
 
   await c.env.ENVIRONMENT_RESERVATION.delete(environment);
 
   return c.json({
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `Environment \`${environment}\` has been successfully unreserved`,
-        },
-      },
-    ],
-    response_type: 'ephemeral',
+    privateMessageViewer: user,
+    text: `Environment \`${environment}\` has been successfully unreserved`,
   });
 }
