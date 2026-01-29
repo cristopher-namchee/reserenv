@@ -1,9 +1,9 @@
 # Reserenv
 
-A slack bot that shows GLChat environment usage.
+A Google Chat bot that shows GLChat environment usage.
 
 > [!WARNING]
-> This bot doesn't correctly synchronize with infrastructure conditions. Therefore, the environment user might be inaccurate!
+> This bot doesn't correctly synchronize with infrastructure conditions _yet_. Therefore, the environment user might be inaccurate!
 
 ## Supported Environments
 
