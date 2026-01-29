@@ -64,7 +64,7 @@ export async function getGoogleAuthToken(
     const key = await crypto.subtle.importKey(
       'pkcs8',
       pemToArrayBuffer(pem),
-      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-512' },
+      { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
       false,
       ['sign'],
     );

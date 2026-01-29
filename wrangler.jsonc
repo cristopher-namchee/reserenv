@@ -17,9 +17,7 @@
 		}
 	],
 	"triggers": {
-		"crons": [
-			// "0 2 * * 2-6"
-		]
+		"crons": ["0 2 * * 2-6"]
 	},
 	"keep_vars": true
 	/**
