@@ -32,7 +32,7 @@ export default async function (env: Env) {
     }),
   );
 
-  const token = getGoogleAuthToken(
+  const token = await getGoogleAuthToken(
     env.SERVICE_ACCOUNT_EMAIL,
     env.SERVICE_ACCOUNT_PRIVATE_KEY,
   );
@@ -41,7 +41,7 @@ export default async function (env: Env) {
     Object.entries(reservations).map(async ([key, reservations]) => {
       const text = `*🔔 Environment Reservation Reminder*
       
-Hello! This is a friendly reminder that you still have the following environment(s) reserved:
+Hello {user}! This is a friendly reminder that you still have the following environment(s) reserved:
 
 ${reservations
   .map(
@@ -66,19 +66,24 @@ Please don't forget to unreserve the environment(s) with the \`/unreserve\` comm
 
 - Reverting migrations
 - Restoring environment variables
-- Clean temporary files
-`;
+- Clean temporary files`;
 
-      await fetch(`https://chat.googleapis.com/v1/${key}/messages`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      await fetch(
+        `https://chat.googleapis.com/v1/spaces/${env.DAILY_GOOGLE_SPACE}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: text.replace('{user}', `<${key}>`),
+            privateMessageViewer: {
+              name: key,
+            },
+          }),
         },
-        body: JSON.stringify({
-          text: text, // This is the message the user sees
-        }),
-      });
+      );
     }),
   );
 }
