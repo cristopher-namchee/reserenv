@@ -41,7 +41,10 @@ ${Environments.map((env) => `- ${env}`)}`,
 
     return c.json({
       privateMessageViewer: user,
-      text: `Environment \`${environment}\` is still being reserved by <${id}>. Please ask the user to unreserve it first.`,
+      text:
+        id === user.name
+          ? 'You have this environment reserved already!'
+          : `Environment \`${environment}\` is still being reserved by <${id}>. Please ask the user to unreserve it first.`,
     });
   }
 
