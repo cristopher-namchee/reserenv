@@ -15,49 +15,22 @@ async function generateEnvironmentCards(
     }),
   );
 
-  return {
-    text: 'Below are the list of the reservation status.',
-    cardsV2: envData.map(({ env, meta }) => ({
-      cardId: `card-${env}`,
-      card: {
-        header: {
-          title: env,
-          subtitle: 'GLChat Development Environment',
-        },
-        sections: [
-          {
-            collapsible: false,
-            widgets: [
-              {
-                decoratedText: {
-                  topLabel: 'Reserved By',
-                  startIcon: {
-                    knownIcon: 'EMAIL',
-                  },
-                  text: meta ? `<${meta.id}>` : '-',
-                },
-              },
-              {
-                decoratedText: {
-                  topLabel: 'Reserved Since',
-                  startIcon: {
-                    knownIcon: 'CLOCK',
-                  },
-                  text: meta
-                    ? new Date(meta.since).toLocaleDateString('en-GB', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })
-                    : '-',
-                },
-              },
-            ],
-          },
-        ],
-      },
-    })),
-  };
+  return `Below are the list of the reservation status.
+  
+${envData
+  .map(
+    ({ env, meta }) =>
+      `*${env}*\n\n_Reserved By_: ${meta ? `<${meta.id}}>` : '-'}\n_Reserved Since_: ${
+        meta
+          ? new Date(meta.since).toLocaleDateString('en-GB', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          : '-'
+      }`,
+  )
+  .join('\n\n')}`;
 }
 
 export default async function (c: Context<{ Bindings: Env }>) {
@@ -71,14 +44,14 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   // only the slash
   if (params.length === 0) {
-    const blockBody = await generateEnvironmentCards(
+    const text = await generateEnvironmentCards(
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
     );
 
     return c.json({
       privateMessageViewer: user,
-      ...blockBody,
+      text,
     });
   }
 
@@ -117,13 +90,13 @@ export default async function (c: Context<{ Bindings: Env }>) {
     });
   }
 
-  const blockBody = await generateEnvironmentCards(
+  const text = await generateEnvironmentCards(
     environments,
     c.env.ENVIRONMENT_RESERVATION,
   );
 
   return c.json({
     privateMessageViewer: user,
-    ...blockBody,
+    text,
   });
 }
