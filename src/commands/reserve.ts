@@ -1,4 +1,5 @@
 import type { Context } from 'hono';
+import { Environments } from '../const';
 import { normalizeEnvironments } from '../lib/env';
 import type { Env, GoogleChatEvent } from '../types';
 
@@ -10,6 +11,16 @@ export default async function (c: Context<{ Bindings: Env }>) {
   }
 
   const [_, ...params] = message.text.split(/\s+/);
+
+  if (params.length === 0) {
+    return c.json({
+      privateMessageViewer: user,
+      text: `You need to specify the environment you want to reserve. Available environment(s):
+      
+${Environments.map((env) => `- ${env}`)}`,
+    });
+  }
+
   const environments = normalizeEnvironments(params);
 
   if (environments.length !== 1) {

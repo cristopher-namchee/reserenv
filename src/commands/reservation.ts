@@ -67,7 +67,10 @@ export default async function (c: Context<{ Bindings: Env }>) {
     return c.json({});
   }
 
-  if (!message.text.trim()) {
+  const [_, ...params] = message.text.split(/\s+/);
+
+  // only the slash
+  if (params.length === 0) {
     const blockBody = await generateEnvironmentCards(
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
@@ -79,7 +82,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
     });
   }
 
-  const [_, ...params] = message.text.split(/\s+/);
   const environments = normalizeEnvironments(params);
 
   if (environments.length === 0) {
