@@ -20,7 +20,7 @@ async function generateEnvironmentCards(
 ${envData
   .map(
     ({ env, meta }) =>
-      `*${env}*\n\n_Reserved By_: ${meta ? `<${meta.id}}>` : '-'}\n_Reserved Since_: ${
+      `*${env}*\n\n_Reserved By_: ${meta ? `<${meta.id}>` : '-'}\n_Reserved Since_: ${
         meta
           ? new Date(meta.since).toLocaleDateString('en-GB', {
               year: 'numeric',
