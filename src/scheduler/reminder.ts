@@ -1,5 +1,5 @@
 import { Environments } from '../const';
-import { getGoogleAuthToken } from '../lib';
+import { getGoogleAuthToken } from '../lib/google';
 
 import type { Env } from '../types';
 
@@ -76,7 +76,7 @@ Please don't forget to unreserve the environment(s) with the \`/unreserve\` comm
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          formattedText: text, // This is the message the user sees
+          text: text, // This is the message the user sees
         }),
       });
     }),
