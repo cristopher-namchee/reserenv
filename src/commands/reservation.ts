@@ -80,13 +80,16 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     return c.json({
       privateMessageViewer: user,
-      text: `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
-        meta.since,
-      ).toLocaleDateString('en-GB', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })}`,
+      text:
+        meta.id === user.name
+          ? 'You are currently reserving this environment.'
+          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
+              meta.since,
+            ).toLocaleDateString('en-GB', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}`,
     });
   }
 
