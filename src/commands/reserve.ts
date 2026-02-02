@@ -6,7 +6,7 @@ import type { Env, GoogleChatEvent } from '../types';
 export default async function (c: Context<{ Bindings: Env }>) {
   const { user, message } = (await c.req.json()) as GoogleChatEvent;
 
-  if (!message) {
+  if (!message?.text) {
     return c.json({});
   }
 
@@ -16,9 +16,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
     return c.json({
       privateMessageViewer: user,
       text: `You need to specify the environment you want to reserve.
-       
+
 Available environment(s):
-      
+
 ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     });
   }
@@ -26,6 +26,14 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   const environments = normalizeEnvironments(params);
 
   if (environments.length !== 1) {
+    console.log({
+      privateMessageViewer: user,
+      text:
+        environments.length === 0
+          ? "The specified environment doesn't exist!"
+          : 'To avoid resource hogging, you *cannot* reserve more than 1 environment at once for now. Please reserve them one by one.',
+    });
+
     return c.json({
       privateMessageViewer: user,
       text:

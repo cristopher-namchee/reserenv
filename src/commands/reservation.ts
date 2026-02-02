@@ -1,4 +1,5 @@
 import type { Context } from 'hono';
+
 import { Environments } from '../const';
 import { normalizeEnvironments } from '../lib/env';
 import type { Env, GoogleChatEvent } from '../types';
@@ -16,7 +17,7 @@ async function generateEnvironmentCards(
   );
 
   return `Below are the list of the reservation status.
-  
+
 ${envData
   .map(
     ({ env, meta }) =>
@@ -36,7 +37,7 @@ ${envData
 export default async function (c: Context<{ Bindings: Env }>) {
   const { user, message } = (await c.req.json()) as GoogleChatEvent;
 
-  if (!message) {
+  if (!message?.text) {
     return c.json({});
   }
 
@@ -49,6 +50,11 @@ export default async function (c: Context<{ Bindings: Env }>) {
       c.env.ENVIRONMENT_RESERVATION,
     );
 
+    console.log({
+      privateMessageViewer: user,
+      text,
+    });
+
     return c.json({
       privateMessageViewer: user,
       text,
@@ -58,6 +64,11 @@ export default async function (c: Context<{ Bindings: Env }>) {
   const environments = normalizeEnvironments(params);
 
   if (environments.length === 0) {
+    console.log({
+      privateMessageViewer: user,
+      text: "The specified environment(s) doesn't exist!",
+    });
+
     return c.json({
       privateMessageViewer: user,
       text: "The specified environment(s) doesn't exist!",
@@ -69,6 +80,11 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
 
+    console.log({
+      privateMessageViewer: user,
+      text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
+    });
+
     if (!status) {
       return c.json({
         privateMessageViewer: user,
@@ -77,6 +93,20 @@ export default async function (c: Context<{ Bindings: Env }>) {
     }
 
     const meta = JSON.parse(status);
+
+    console.log({
+      privateMessageViewer: user,
+      text:
+        meta.id === user.name
+          ? 'You are currently reserving this environment.'
+          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
+              meta.since,
+            ).toLocaleDateString('en-GB', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}`,
+    });
 
     return c.json({
       privateMessageViewer: user,
@@ -97,6 +127,11 @@ export default async function (c: Context<{ Bindings: Env }>) {
     environments,
     c.env.ENVIRONMENT_RESERVATION,
   );
+
+  console.log({
+    privateMessageViewer: user,
+    text,
+  });
 
   return c.json({
     privateMessageViewer: user,
