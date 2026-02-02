@@ -14,11 +14,13 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   if (params.length === 0) {
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text: `You need to specify the environment you want to unreserve.
-      
+
 Available environment(s):
-       
+
 ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     });
   }
@@ -27,7 +29,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
 
   if (environments.length !== 1) {
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text:
         environments.length === 0
           ? "The specified environment doesn't exist!"
@@ -40,7 +44,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
   if (!meta) {
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text: `Environment \`${environment}\` is not being reserved.`,
     });
   }
@@ -48,7 +54,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   const { id } = JSON.parse(meta);
   if (id !== user.name) {
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text: `You cannot unreserve \`${environment}\` as it is being reserved by <@${id}>`,
     });
   }
@@ -56,7 +64,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   await c.env.ENVIRONMENT_RESERVATION.delete(environment);
 
   return c.json({
-    privateMessageViewer: user,
+    privateMessageViewer: {
+      name: user.name,
+    },
     text: `Environment \`${environment}\` has been successfully unreserved`,
   });
 }

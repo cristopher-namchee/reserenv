@@ -14,7 +14,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   if (params.length === 0) {
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text: `You need to specify the environment you want to reserve.
 
 Available environment(s):
@@ -26,16 +28,10 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   const environments = normalizeEnvironments(params);
 
   if (environments.length !== 1) {
-    console.log({
-      privateMessageViewer: user,
-      text:
-        environments.length === 0
-          ? "The specified environment doesn't exist!"
-          : 'To avoid resource hogging, you *cannot* reserve more than 1 environment at once for now. Please reserve them one by one.',
-    });
-
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text:
         environments.length === 0
           ? "The specified environment doesn't exist!"
@@ -50,7 +46,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     const { id } = JSON.parse(meta);
 
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text:
         id === user.name
           ? 'You have this environment reserved already!'
@@ -65,7 +63,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   await c.env.ENVIRONMENT_RESERVATION.put(environment, newMeta);
 
   return c.json({
-    privateMessageViewer: user,
+    privateMessageViewer: {
+      name: user.name,
+    },
     text: `Environment \`${environment}\` successfully reserved.`,
   });
 }

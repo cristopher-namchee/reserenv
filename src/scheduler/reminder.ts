@@ -37,6 +37,10 @@ export default async function (env: Env) {
     env.SERVICE_ACCOUNT_PRIVATE_KEY,
   );
 
+  if (!token) {
+    return;
+  }
+
   await Promise.all(
     Object.entries(reservations).map(async ([key, reservations]) => {
       const text = `*🔔 Environment Reservation Reminder*

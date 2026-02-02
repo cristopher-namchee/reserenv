@@ -50,13 +50,10 @@ export default async function (c: Context<{ Bindings: Env }>) {
       c.env.ENVIRONMENT_RESERVATION,
     );
 
-    console.log({
-      privateMessageViewer: user,
-      text,
-    });
-
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text,
     });
   }
@@ -64,13 +61,10 @@ export default async function (c: Context<{ Bindings: Env }>) {
   const environments = normalizeEnvironments(params);
 
   if (environments.length === 0) {
-    console.log({
-      privateMessageViewer: user,
-      text: "The specified environment(s) doesn't exist!",
-    });
-
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text: "The specified environment(s) doesn't exist!",
     });
   }
@@ -80,36 +74,21 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
 
-    console.log({
-      privateMessageViewer: user,
-      text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
-    });
-
     if (!status) {
       return c.json({
-        privateMessageViewer: user,
+        privateMessageViewer: {
+          name: user.name,
+        },
         text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
       });
     }
 
     const meta = JSON.parse(status);
 
-    console.log({
-      privateMessageViewer: user,
-      text:
-        meta.id === user.name
-          ? 'You are currently reserving this environment.'
-          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
-              meta.since,
-            ).toLocaleDateString('en-GB', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}`,
-    });
-
     return c.json({
-      privateMessageViewer: user,
+      privateMessageViewer: {
+        name: user.name,
+      },
       text:
         meta.id === user.name
           ? 'You are currently reserving this environment.'
@@ -128,13 +107,10 @@ export default async function (c: Context<{ Bindings: Env }>) {
     c.env.ENVIRONMENT_RESERVATION,
   );
 
-  console.log({
-    privateMessageViewer: user,
-    text,
-  });
-
   return c.json({
-    privateMessageViewer: user,
+    privateMessageViewer: {
+      name: user.name,
+    },
     text,
   });
 }
