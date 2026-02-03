@@ -59,7 +59,6 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   const newMeta = JSON.stringify({
     id: user.name,
     since: new Date().toISOString(),
-    name: user.displayName.
   });
   await c.env.ENVIRONMENT_RESERVATION.put(environment, newMeta);
 
