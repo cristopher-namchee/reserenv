@@ -13,6 +13,9 @@ export interface GoogleAuthResponse {
 
 export interface GoogleChatEvent {
   type: string;
+  space: {
+    name: string;
+  };
   message?: {
     text: string;
     slashCommand?: {
