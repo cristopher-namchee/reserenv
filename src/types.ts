@@ -13,6 +13,9 @@ export interface GoogleAuthResponse {
 
 export interface GoogleChatEvent {
   type: string;
+  space: {
+    name: string;
+  };
   message?: {
     text: string;
     slashCommand?: {
@@ -23,6 +26,6 @@ export interface GoogleChatEvent {
     name: string;
     displayName: string;
     email: string;
-    type: 'HUMAN' | 'BOT';
+    type: "HUMAN" | "BOT";
   };
 }
