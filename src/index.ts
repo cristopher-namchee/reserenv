@@ -10,7 +10,7 @@ import type { Env, GoogleChatEvent } from './types';
 
 const commandMap: Record<
   string,
-  (c: Context<{ Bindings: Env }>) => Promise<Response>
+  (c: Context<{ Bindings: Env }>) => Promise<void>
 > = {
   '1': reservation,
   '2': reserve,
