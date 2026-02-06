@@ -6,11 +6,13 @@ import type { Env } from '../types';
 interface ReservationInfo {
   id: string;
   since: string; // ISO string
+  channel: string;
 }
 
 interface UserReservation {
   environment: string;
   since: string;
+  channel: string;
 }
 
 export default async function (env: Env) {
@@ -21,13 +23,15 @@ export default async function (env: Env) {
       const reservation = await env.ENVIRONMENT_RESERVATION.get(environment);
 
       if (reservation) {
-        const { id, since } = JSON.parse(reservation) as ReservationInfo;
+        const { id, since, channel } = JSON.parse(
+          reservation,
+        ) as ReservationInfo;
 
         if (!reservations[id]) {
           reservations[id] = [];
         }
 
-        reservations[id].push({ environment, since });
+        reservations[id].push({ environment, since, channel });
       }
     }),
   );
@@ -73,7 +77,7 @@ Please don't forget to unreserve the environment(s) with the \`/unreserve\` comm
 - Clean temporary files`;
 
       const response = await fetch(
-        `https://chat.googleapis.com/v1/spaces/${env.DAILY_GOOGLE_SPACE}/messages`,
+        `https://chat.googleapis.com/v1/${reservations[0].channel}/messages`,
         {
           method: 'POST',
           headers: {
@@ -95,7 +99,7 @@ Please don't forget to unreserve the environment(s) with the \`/unreserve\` comm
         console.error(body);
 
         throw new Error(
-          `Failed to send 'direct message' to channel. Response returned ${response.status}`,
+          `Failed to send reminder message to user. Response returned ${response.status}`,
         );
       }
     }),
