@@ -2,10 +2,9 @@ import type { Context } from 'hono';
 
 import { Environments } from '../const';
 import { normalizeEnvironments } from '../lib/env';
-import { sendMessage } from '../lib/google';
 import type { Env, GoogleChatEvent } from '../types';
 
-async function generateEnvironmentsReport(
+async function generateEnvironmentCards(
   environments: string[],
   kv: KVNamespace,
 ) {
@@ -39,29 +38,35 @@ export default async function (c: Context<{ Bindings: Env }>) {
   const { user, message } = (await c.req.json()) as GoogleChatEvent;
 
   if (!message?.text) {
-    return;
+    return c.json({});
   }
 
   const [_, ...params] = message.text.split(/\s+/);
 
   // only the slash
   if (params.length === 0) {
-    const text = await generateEnvironmentsReport(
+    const text = await generateEnvironmentCards(
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
     );
 
-    return sendMessage(c.env, user.name, text);
+    return c.json({
+      privateMessageViewer: {
+        name: user.name,
+      },
+      text,
+    });
   }
 
   const environments = normalizeEnvironments(params);
 
   if (environments.length === 0) {
-    return sendMessage(
-      c.env,
-      user.name,
-      "The specified environment(s) doesn't exist!",
-    );
+    return c.json({
+      privateMessageViewer: {
+        name: user.name,
+      },
+      text: "The specified environment(s) doesn't exist!",
+    });
   }
 
   if (environments.length === 1) {
@@ -70,32 +75,42 @@ export default async function (c: Context<{ Bindings: Env }>) {
     const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
 
     if (!status) {
-      return sendMessage(
-        c.env,
-        user.name,
-        `Environment \`${environment}\` is unreserved. You may reserve it with \`/reserve\` command`,
-      );
+      return c.json({
+        privateMessageViewer: {
+          name: user.name,
+        },
+        text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
+      });
     }
 
     const meta = JSON.parse(status);
-    const text =
-      meta.id === user.name
-        ? 'You are currently reserving this environment.'
-        : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
-            meta.since,
-          ).toLocaleDateString('en-GB', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}`;
 
-    return sendMessage(c.env, user.name, text);
+    return c.json({
+      privateMessageViewer: {
+        name: user.name,
+      },
+      text:
+        meta.id === user.name
+          ? 'You are currently reserving this environment.'
+          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
+              meta.since,
+            ).toLocaleDateString('en-GB', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}`,
+    });
   }
 
-  const text = await generateEnvironmentsReport(
+  const text = await generateEnvironmentCards(
     environments,
     c.env.ENVIRONMENT_RESERVATION,
   );
 
-  return sendMessage(c.env, user.name, text);
+  return c.json({
+    privateMessageViewer: {
+      name: user.name,
+    },
+    text,
+  });
 }
