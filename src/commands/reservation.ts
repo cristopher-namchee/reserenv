@@ -5,7 +5,7 @@ import { normalizeEnvironments } from '../lib/env';
 import { sendMessage } from '../lib/google';
 import type { Env, GoogleChatEvent } from '../types';
 
-async function generateEnvironmentCards(
+async function generateEnvironmentsReport(
   environments: string[],
   kv: KVNamespace,
 ) {
@@ -39,14 +39,14 @@ export default async function (c: Context<{ Bindings: Env }>) {
   const { user, message } = (await c.req.json()) as GoogleChatEvent;
 
   if (!message?.text) {
-    return c.json({});
+    return;
   }
 
   const [_, ...params] = message.text.split(/\s+/);
 
   // only the slash
   if (params.length === 0) {
-    const text = await generateEnvironmentCards(
+    const text = await generateEnvironmentsReport(
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
     );
@@ -92,7 +92,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
     return sendMessage(c.env, user.name, text);
   }
 
-  const text = await generateEnvironmentCards(
+  const text = await generateEnvironmentsReport(
     environments,
     c.env.ENVIRONMENT_RESERVATION,
   );

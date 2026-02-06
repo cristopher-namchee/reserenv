@@ -8,7 +8,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
   const { user, message } = (await c.req.json()) as GoogleChatEvent;
 
   if (!message) {
-    return c.json({});
+    return;
   }
 
   const [_, ...params] = message.text.split(/\s+/);
