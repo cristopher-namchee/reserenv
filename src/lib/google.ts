@@ -1,6 +1,6 @@
 import { JWT } from '../const';
 
-import type { Env, GoogleAuthResponse } from '../types';
+import type { GoogleAuthResponse } from '../types';
 
 function b64(input: ArrayBuffer | string) {
   const bytes =
@@ -90,6 +90,10 @@ export async function getGoogleAuthToken(
     });
 
     if (!response.ok) {
+      const body = await response.json();
+
+      console.log(body);
+
       throw new Error(`Response returned ${response.status}`);
     }
 
@@ -104,47 +108,5 @@ export async function getGoogleAuthToken(
     console.error('Failed to get access token from Google:', err);
 
     return '';
-  }
-}
-
-export async function sendMessage(
-  env: Env,
-  user: string,
-  text: string,
-): Promise<void> {
-  const token = await getGoogleAuthToken(
-    env.SERVICE_ACCOUNT_EMAIL,
-    env.SERVICE_ACCOUNT_PRIVATE_KEY,
-  );
-
-  if (!token) {
-    return;
-  }
-
-  const response = await fetch(
-    `https://chat.googleapis.com/v1/spaces/${env.DAILY_GOOGLE_SPACE}/messages`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text,
-        privateMessageViewer: {
-          name: user,
-        },
-      }),
-    },
-  );
-
-  if (!response.ok) {
-    const body = await response.json();
-
-    console.log(body);
-
-    throw new Error(
-      `Failed to send message. Chat API returned ${response.status}`,
-    );
   }
 }
