@@ -90,10 +90,6 @@ export async function getGoogleAuthToken(
     });
 
     if (!response.ok) {
-      const body = await response.json();
-
-      console.log(body);
-
       throw new Error(`Response returned ${response.status}`);
     }
 

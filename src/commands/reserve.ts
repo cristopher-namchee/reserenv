@@ -4,7 +4,7 @@ import { normalizeEnvironments } from '../lib/env';
 import type { Env, GoogleChatEvent } from '../types';
 
 export default async function (c: Context<{ Bindings: Env }>) {
-  const { user, message } = (await c.req.json()) as GoogleChatEvent;
+  const { user, message, space } = (await c.req.json()) as GoogleChatEvent;
 
   if (!message?.text) {
     return c.json({});
@@ -50,6 +50,7 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   const newMeta = JSON.stringify({
     id: user.name,
     since: new Date().toISOString(),
+    channel: space.name,
   });
   await c.env.ENVIRONMENT_RESERVATION.put(environment, newMeta);
 
