@@ -51,9 +51,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
     );
 
     return c.json({
-      privateMessageViewer: {
-        name: user.name,
-      },
       text,
     });
   }
@@ -62,9 +59,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   if (environments.length === 0) {
     return c.json({
-      privateMessageViewer: {
-        name: user.name,
-      },
       text: "The specified environment(s) doesn't exist!",
     });
   }
@@ -76,9 +70,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     if (!status) {
       return c.json({
-        privateMessageViewer: {
-          name: user.name,
-        },
         text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
       });
     }
@@ -86,9 +77,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
     const meta = JSON.parse(status);
 
     return c.json({
-      privateMessageViewer: {
-        name: user.name,
-      },
       text:
         meta.id === user.name
           ? 'You are currently reserving this environment.'
@@ -108,9 +96,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
   );
 
   return c.json({
-    privateMessageViewer: {
-      name: user.name,
-    },
     text,
   });
 }
