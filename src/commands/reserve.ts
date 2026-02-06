@@ -14,9 +14,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   if (params.length === 0) {
     return c.json({
-      privateMessageViewer: {
-        name: user.name,
-      },
       text: `You need to specify the environment you want to reserve.
 
 Available environment(s):
@@ -29,9 +26,6 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
 
   if (environments.length !== 1) {
     return c.json({
-      privateMessageViewer: {
-        name: user.name,
-      },
       text:
         environments.length === 0
           ? "The specified environment doesn't exist!"
@@ -46,9 +40,6 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     const { id } = JSON.parse(meta);
 
     return c.json({
-      privateMessageViewer: {
-        name: user.name,
-      },
       text:
         id === user.name
           ? 'You have this environment reserved already!'
@@ -63,9 +54,6 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   await c.env.ENVIRONMENT_RESERVATION.put(environment, newMeta);
 
   return c.json({
-    privateMessageViewer: {
-      name: user.name,
-    },
     text: `Environment \`${environment}\` successfully reserved.`,
   });
 }

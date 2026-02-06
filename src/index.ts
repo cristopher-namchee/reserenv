@@ -23,11 +23,11 @@ const app = new Hono<{ Bindings: Env }>();
 app.post('/', async (c) => {
   const event = (await c.req.json()) as GoogleChatEvent;
 
+  const isDM =
+    event.space.type === 'DIRECT_MESSAGE' && event.space.singleUserBotDm;
+
   // ignore request outside the designated space
-  if (
-    event.user.type === 'BOT' ||
-    event.space.name !== `spaces/${c.env.DAILY_GOOGLE_SPACE}`
-  ) {
+  if (event.user.type === 'BOT' || !isDM) {
     return c.json({});
   }
 

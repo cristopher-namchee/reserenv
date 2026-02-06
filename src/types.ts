@@ -15,6 +15,8 @@ export interface GoogleChatEvent {
   type: string;
   space: {
     name: string;
+    type: 'SPACE' | 'DIRECT_MESSAGE';
+    singleUserBotDm: boolean;
   };
   message?: {
     text: string;
