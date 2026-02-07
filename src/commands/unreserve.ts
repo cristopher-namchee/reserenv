@@ -1,5 +1,7 @@
 import type { Context } from 'hono';
+
 import { Environments } from '../const';
+import { formatDate } from '../lib/date';
 import { normalizeEnvironments } from '../lib/env';
 import type { Env, GoogleChatEvent } from '../types';
 
@@ -45,13 +47,7 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   const { id, since } = JSON.parse(meta);
   if (id !== user.name) {
     return c.json({
-      text: `You cannot unreserve \`${environment}\` as it is being reserved by <${id}> since ${new Date(
-        since,
-      ).toLocaleDateString('en-GB', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })}`,
+      text: `You cannot unreserve \`${environment}\` as it is being reserved by <${id}> since ${formatDate(since)}`,
     });
   }
 

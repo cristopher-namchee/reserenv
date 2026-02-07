@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
 
 import { Environments } from '../const';
+import { formatDate } from '../lib/date';
 import { normalizeEnvironments } from '../lib/env';
 import type { Env, GoogleChatEvent } from '../types';
 
@@ -22,13 +23,7 @@ ${envData
   .map(
     ({ env, meta }) =>
       `*${env}*\n\n_Reserved By_: ${meta ? `<${meta.id}>` : '-'}\n_Reserved Since_: ${
-        meta
-          ? new Date(meta.since).toLocaleDateString('en-GB', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })
-          : '-'
+        meta ? formatDate(meta.since) : '-'
       }`,
   )
   .join('\n\n')}`;
@@ -49,8 +44,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
     );
-
-    console.log(text);
 
     return c.json({
       text,
@@ -82,13 +75,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
       text:
         meta.id === user.name
           ? 'You are currently reserving this environment.'
-          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
-              meta.since,
-            ).toLocaleDateString('en-GB', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}`,
+          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${formatDate(meta.since)}`,
     });
   }
 
