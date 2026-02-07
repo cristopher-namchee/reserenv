@@ -38,18 +38,18 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
 
   const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
   if (meta) {
-    const { email } = JSON.parse(meta);
+    const { id } = JSON.parse(meta);
 
     return c.json({
       text:
-        email === user.email
+        id === user.name
           ? 'You have this environment reserved already!'
-          : `Environment \`${environment}\` is still being reserved by <users/${email}>. Please ask the user to unreserve it first.`,
+          : `Environment \`${environment}\` is still being reserved by <${id}>. Please ask the user to unreserve it first.`,
     });
   }
 
   const newMeta = JSON.stringify({
-    email: user.email,
+    id: user.name,
     since: new Date().toISOString(),
     channel: space.name,
   });

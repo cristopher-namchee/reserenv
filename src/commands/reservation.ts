@@ -4,7 +4,7 @@ import { Environments } from '../const';
 import { normalizeEnvironments } from '../lib/env';
 import type { Env, GoogleChatEvent } from '../types';
 
-async function generateEnvironmentCards(
+async function generateEnvironmentUsage(
   environments: string[],
   kv: KVNamespace,
 ) {
@@ -21,7 +21,7 @@ async function generateEnvironmentCards(
 ${envData
   .map(
     ({ env, meta }) =>
-      `*${env}*\n\n_Reserved By_: ${meta ? `<users/${meta.email}>` : '-'}\n_Reserved Since_: ${
+      `*${env}*\n\n_Reserved By_: ${meta ? `<${meta.id}>` : '-'}\n_Reserved Since_: ${
         meta
           ? new Date(meta.since).toLocaleDateString('en-GB', {
               year: 'numeric',
@@ -45,10 +45,12 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   // only the slash
   if (params.length === 0) {
-    const text = await generateEnvironmentCards(
+    const text = await generateEnvironmentUsage(
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
     );
+
+    console.log(text);
 
     return c.json({
       text,
@@ -78,9 +80,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     return c.json({
       text:
-        meta.email === user.email
+        meta.id === user.name
           ? 'You are currently reserving this environment.'
-          : `Environment \`${environment}\` is being reserved by <users/${meta.email}> since ${new Date(
+          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
               meta.since,
             ).toLocaleDateString('en-GB', {
               year: 'numeric',
@@ -90,7 +92,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
     });
   }
 
-  const text = await generateEnvironmentCards(
+  const text = await generateEnvironmentUsage(
     environments,
     c.env.ENVIRONMENT_RESERVATION,
   );
