@@ -41,7 +41,9 @@ app.post('/', async (c) => {
   return c.json({});
 });
 
-app.onError((_e, c) => {
+app.onError((e, c) => {
+  console.error(e);
+
   return c.json(
     {
       message: 'Unable to handle event',
