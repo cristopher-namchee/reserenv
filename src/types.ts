@@ -13,13 +13,13 @@ export interface GoogleChatEvent {
   type: string;
   space: {
     name: string;
-    type: 'SPACE' | 'DIRECT_MESSAGE';
+    type: 'SPACE' | 'DM';
     singleUserBotDm: boolean;
   };
   message?: {
     text: string;
     slashCommand?: {
-      commandId: number;
+      commandId: string;
     };
   };
   user: {
