@@ -10,16 +10,20 @@ async function generateEnvironmentUsage(
   environments: string[],
   kv: KVNamespace,
   token: string,
+  self: string,
 ) {
   const envData = await Promise.all(
     environments.map(async (env) => {
-      const user = (await kv.get(env)) as ReservationInfo | null;
+      const rawInfo = await kv.get(env);
+
+      const user = JSON.parse(rawInfo ?? '{}') as ReservationInfo;
 
       const aliases = Object.entries(EnvironmentAlias).filter(
         ([_, value]) => value === env,
       );
 
-      const room = await getChatLink(user?.email ?? '', token);
+      const room =
+        user.email === self ? '' : await getChatLink(user?.email ?? '', token);
 
       return {
         cardId: `card-${env}`,
@@ -112,6 +116,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
       token,
+      user.email,
     );
 
     return c.json({
@@ -153,6 +158,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
     environments,
     c.env.ENVIRONMENT_RESERVATION,
     token,
+    user.email,
   );
 
   return c.json({
