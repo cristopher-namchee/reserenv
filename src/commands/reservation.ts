@@ -35,7 +35,7 @@ ${envData
 }
 
 export default async function (c: Context<{ Bindings: Env }>) {
-  const { sender, message } = (await c.req.json()) as GoogleChatEvent;
+  const { user, message } = (await c.req.json()) as GoogleChatEvent;
 
   if (!message?.text) {
     return c.json({});
@@ -78,9 +78,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     return c.json({
       text:
-        meta.id === sender.name
+        meta.email === user.email
           ? 'You are currently reserving this environment.'
-          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
+          : `Environment \`${environment}\` is being reserved by <users/${meta.email}> since ${new Date(
               meta.since,
             ).toLocaleDateString('en-GB', {
               year: 'numeric',
