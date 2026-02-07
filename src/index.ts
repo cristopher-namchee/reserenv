@@ -26,7 +26,7 @@ app.post('/', async (c) => {
   const isDM = event.space.type === 'DM' && event.space.singleUserBotDm;
 
   // ignore request outside the designated space
-  if (event.user.type === 'BOT' || !isDM) {
+  if (event.sender.type === 'BOT' || !isDM) {
     return c.json({});
   }
 

@@ -21,7 +21,7 @@ async function generateEnvironmentCards(
 ${envData
   .map(
     ({ env, meta }) =>
-      `*${env}*\n\n_Reserved By_: ${meta ? `<${meta.id}>` : '-'}\n_Reserved Since_: ${
+      `*${env}*\n\n_Reserved By_: ${meta ? `<users/${meta.email}>` : '-'}\n_Reserved Since_: ${
         meta
           ? new Date(meta.since).toLocaleDateString('en-GB', {
               year: 'numeric',
@@ -35,7 +35,7 @@ ${envData
 }
 
 export default async function (c: Context<{ Bindings: Env }>) {
-  const { user, message } = (await c.req.json()) as GoogleChatEvent;
+  const { sender, message } = (await c.req.json()) as GoogleChatEvent;
 
   if (!message?.text) {
     return c.json({});
@@ -78,7 +78,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     return c.json({
       text:
-        meta.id === user.name
+        meta.id === sender.name
           ? 'You are currently reserving this environment.'
           : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
               meta.since,

@@ -22,9 +22,8 @@ export interface GoogleChatEvent {
       commandId: string;
     };
   };
-  user: {
+  sender: {
     name: string;
-    displayName: string;
     email: string;
     type: 'HUMAN' | 'BOT';
   };

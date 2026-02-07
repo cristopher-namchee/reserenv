@@ -4,7 +4,7 @@ import { normalizeEnvironments } from '../lib/env';
 import type { Env, GoogleChatEvent } from '../types';
 
 export default async function (c: Context<{ Bindings: Env }>) {
-  const { user, message } = (await c.req.json()) as GoogleChatEvent;
+  const { sender, message } = (await c.req.json()) as GoogleChatEvent;
 
   if (!message) {
     return c.json({});
@@ -42,10 +42,10 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     });
   }
 
-  const { id } = JSON.parse(meta);
-  if (id !== user.name) {
+  const { email } = JSON.parse(meta);
+  if (email !== sender.email) {
     return c.json({
-      text: `You cannot unreserve \`${environment}\` as it is being reserved by <@${id}>`,
+      text: `You cannot unreserve \`${environment}\` as it is being reserved by <users/${email}>`,
     });
   }
 

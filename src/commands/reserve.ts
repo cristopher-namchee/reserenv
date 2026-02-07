@@ -1,10 +1,11 @@
 import type { Context } from 'hono';
+
 import { Environments } from '../const';
 import { normalizeEnvironments } from '../lib/env';
 import type { Env, GoogleChatEvent } from '../types';
 
 export default async function (c: Context<{ Bindings: Env }>) {
-  const { user, message, space } = (await c.req.json()) as GoogleChatEvent;
+  const { sender, message, space } = (await c.req.json()) as GoogleChatEvent;
 
   if (!message?.text) {
     return c.json({});
@@ -37,18 +38,18 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
 
   const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
   if (meta) {
-    const { id } = JSON.parse(meta);
+    const { email } = JSON.parse(meta);
 
     return c.json({
       text:
-        id === user.name
+        email === sender.email
           ? 'You have this environment reserved already!'
-          : `Environment \`${environment}\` is still being reserved by <${id}>. Please ask the user to unreserve it first.`,
+          : `Environment \`${environment}\` is still being reserved by <users/${email}>. Please ask the user to unreserve it first.`,
     });
   }
 
   const newMeta = JSON.stringify({
-    id: user.name,
+    email: sender.email,
     since: new Date().toISOString(),
     channel: space.name,
   });

@@ -2,6 +2,7 @@ import { Environments } from '../const';
 
 const EnvironmentAlias: Record<string, (typeof Environments)[number]> = {
   dev1: 'dev',
+  staging: 'stag',
 };
 
 /**
