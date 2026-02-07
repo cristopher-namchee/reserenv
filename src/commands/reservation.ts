@@ -4,7 +4,7 @@ import { Environments } from '../const';
 import { normalizeEnvironments } from '../lib/env';
 import type { Env, GoogleChatEvent } from '../types';
 
-async function generateEnvironmentCards(
+async function generateEnvironmentUsage(
   environments: string[],
   kv: KVNamespace,
 ) {
@@ -45,10 +45,12 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   // only the slash
   if (params.length === 0) {
-    const text = await generateEnvironmentCards(
+    const text = await generateEnvironmentUsage(
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
     );
+
+    console.log(text);
 
     return c.json({
       text,
@@ -90,7 +92,7 @@ export default async function (c: Context<{ Bindings: Env }>) {
     });
   }
 
-  const text = await generateEnvironmentCards(
+  const text = await generateEnvironmentUsage(
     environments,
     c.env.ENVIRONMENT_RESERVATION,
   );
