@@ -4,7 +4,7 @@ import { getGoogleAuthToken } from '../lib/google';
 import type { Env } from '../types';
 
 interface ReservationInfo {
-  email: string;
+  id: string;
   since: string; // ISO string
   channel: string;
 }
@@ -23,15 +23,15 @@ export default async function (env: Env) {
       const reservation = await env.ENVIRONMENT_RESERVATION.get(environment);
 
       if (reservation) {
-        const { email, since, channel } = JSON.parse(
+        const { id, since, channel } = JSON.parse(
           reservation,
         ) as ReservationInfo;
 
-        if (!reservations[email]) {
-          reservations[email] = [];
+        if (!reservations[id]) {
+          reservations[id] = [];
         }
 
-        reservations[email].push({ environment, since, channel });
+        reservations[id].push({ environment, since, channel });
       }
     }),
   );
@@ -85,7 +85,7 @@ Please don't forget to unreserve the environment(s) with the \`/unreserve\` comm
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            text: text.replace('{user}', `<users/${key}>`),
+            text: text.replace('{user}', `<${key}>`),
             privateMessageViewer: {
               name: key,
             },

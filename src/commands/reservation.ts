@@ -21,7 +21,7 @@ async function generateEnvironmentCards(
 ${envData
   .map(
     ({ env, meta }) =>
-      `*${env}*\n\n_Reserved By_: ${meta ? `<users/${meta.email}>` : '-'}\n_Reserved Since_: ${
+      `*${env}*\n\n_Reserved By_: ${meta ? `<${meta.id}>` : '-'}\n_Reserved Since_: ${
         meta
           ? new Date(meta.since).toLocaleDateString('en-GB', {
               year: 'numeric',
@@ -78,9 +78,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
     return c.json({
       text:
-        meta.email === user.email
+        meta.id === user.name
           ? 'You are currently reserving this environment.'
-          : `Environment \`${environment}\` is being reserved by <users/${meta.email}> since ${new Date(
+          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
               meta.since,
             ).toLocaleDateString('en-GB', {
               year: 'numeric',

@@ -42,10 +42,16 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     });
   }
 
-  const { email } = JSON.parse(meta);
-  if (email !== user.email) {
+  const { id, since } = JSON.parse(meta);
+  if (id !== user.name) {
     return c.json({
-      text: `You cannot unreserve \`${environment}\` as it is being reserved by <users/${email}>`,
+      text: `You cannot unreserve \`${environment}\` as it is being reserved by <${id}> since ${new Date(
+        since,
+      ).toLocaleDateString('en-GB', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })}`,
     });
   }
 
