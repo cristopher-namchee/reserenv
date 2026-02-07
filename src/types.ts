@@ -22,7 +22,7 @@ export interface GoogleChatEvent {
       commandId: string;
     };
   };
-  sender: {
+  user: {
     name: string;
     email: string;
     type: 'HUMAN' | 'BOT';
