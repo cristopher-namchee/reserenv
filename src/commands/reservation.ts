@@ -1,43 +1,106 @@
 import type { Context } from 'hono';
 
-import { Environments } from '../const';
+import { EnvironmentAlias, Environments } from '../const';
+import { formatDate } from '../lib/date';
 import { normalizeEnvironments } from '../lib/env';
-import type { Env, GoogleChatEvent } from '../types';
+import { getChatLink, getGoogleAuthToken } from '../lib/google';
+import type { Env, GoogleChatEvent, ReservationInfo } from '../types';
 
 async function generateEnvironmentUsage(
   environments: string[],
   kv: KVNamespace,
+  token: string,
 ) {
   const envData = await Promise.all(
     environments.map(async (env) => {
-      const user = await kv.get(env);
-      if (!user) return { env, meta: null };
-      return { env, meta: JSON.parse(user) };
+      const user = (await kv.get(env)) as ReservationInfo | null;
+
+      const aliases = Object.entries(EnvironmentAlias).filter(
+        ([_, value]) => value === env,
+      );
+
+      const room = await getChatLink(user?.email ?? '', token);
+
+      return {
+        cardId: `card-${env}`,
+        card: {
+          header: {
+            title: env,
+            subtitle: aliases.map((alias) => alias[0]).join(', '),
+          },
+          sections: [
+            {
+              header: 'Reservation Info',
+              collapsible: true,
+              widgets: [
+                {
+                  decoratedText: {
+                    startIcon: {
+                      knownIcon: 'PERSON',
+                    },
+                    text: user?.name ?? '-',
+                  },
+                },
+                {
+                  decoratedText: {
+                    startIcon: {
+                      knownIcon: 'EMAIL',
+                    },
+                    text: user?.email ?? '-',
+                  },
+                },
+                {
+                  decoratedText: {
+                    startIcon: {
+                      knownIcon: 'INVITE',
+                    },
+                    text: user?.since ? formatDate(user.since) : '-',
+                  },
+                },
+                room
+                  ? {
+                      buttonList: {
+                        buttons: [
+                          {
+                            text: 'Chat',
+                            type: 'FILLED',
+                            icon: {
+                              materialIcon: {
+                                name: 'chat',
+                              },
+                            },
+                            onClick: {
+                              openLink: {
+                                url: room,
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    }
+                  : {},
+              ],
+            },
+          ],
+        },
+      };
     }),
   );
 
-  return `Below are the list of the reservation status.
-
-${envData
-  .map(
-    ({ env, meta }) =>
-      `*${env}*\n\n_Reserved By_: ${meta ? `<${meta.id}>` : '-'}\n_Reserved Since_: ${
-        meta
-          ? new Date(meta.since).toLocaleDateString('en-GB', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })
-          : '-'
-      }`,
-  )
-  .join('\n\n')}`;
+  return {
+    cardsV2: envData,
+  };
 }
 
 export default async function (c: Context<{ Bindings: Env }>) {
   const { user, message } = (await c.req.json()) as GoogleChatEvent;
 
-  if (!message?.text) {
+  const token = await getGoogleAuthToken(
+    c.env.SERVICE_ACCOUNT_EMAIL,
+    c.env.SERVICE_ACCOUNT_PRIVATE_KEY,
+  );
+
+  if (!message?.text || !token) {
     return c.json({});
   }
 
@@ -45,15 +108,15 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   // only the slash
   if (params.length === 0) {
-    const text = await generateEnvironmentUsage(
+    const cards = await generateEnvironmentUsage(
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
+      token,
     );
 
-    console.log(text);
-
     return c.json({
-      text,
+      text: 'Below are the list of GLChat development environment reservation usage.',
+      ...cards,
     });
   }
 
@@ -76,28 +139,24 @@ export default async function (c: Context<{ Bindings: Env }>) {
       });
     }
 
-    const meta = JSON.parse(status);
+    const meta = JSON.parse(status) as ReservationInfo;
 
     return c.json({
       text:
-        meta.id === user.name
+        meta.email === user.email
           ? 'You are currently reserving this environment.'
-          : `Environment \`${environment}\` is being reserved by <${meta.id}> since ${new Date(
-              meta.since,
-            ).toLocaleDateString('en-GB', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}`,
+          : `Environment \`${environment}\` is being reserved by \`${meta.email}\` since ${formatDate(meta.since)}`,
     });
   }
 
-  const text = await generateEnvironmentUsage(
+  const cards = await generateEnvironmentUsage(
     environments,
     c.env.ENVIRONMENT_RESERVATION,
+    token,
   );
 
   return c.json({
-    text,
+    text: 'Below are the list of requested GLChat development environment reservation usage.',
+    ...cards,
   });
 }

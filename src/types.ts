@@ -23,7 +23,14 @@ export interface GoogleChatEvent {
     };
   };
   user: {
-    name: string;
     type: 'HUMAN' | 'BOT';
+    email: string;
+    displayName: string;
   };
+}
+
+export interface ReservationInfo {
+  email: string;
+  name: string;
+  since: string;
 }
