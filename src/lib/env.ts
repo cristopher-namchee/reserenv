@@ -1,9 +1,4 @@
-import { Environments } from '../const';
-
-const EnvironmentAlias: Record<string, (typeof Environments)[number]> = {
-  dev1: 'dev',
-  staging: 'stag',
-};
+import { EnvironmentAlias, Environments } from '../const';
 
 /**
  * Normalize possible parameters by applying alias and removing

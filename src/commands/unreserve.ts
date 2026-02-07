@@ -3,7 +3,7 @@ import type { Context } from 'hono';
 import { Environments } from '../const';
 import { formatDate } from '../lib/date';
 import { normalizeEnvironments } from '../lib/env';
-import type { Env, GoogleChatEvent } from '../types';
+import type { Env, GoogleChatEvent, ReservationInfo } from '../types';
 
 export default async function (c: Context<{ Bindings: Env }>) {
   const { user, message } = (await c.req.json()) as GoogleChatEvent;
@@ -44,10 +44,10 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     });
   }
 
-  const { id, since } = JSON.parse(meta);
-  if (id !== user.name) {
+  const { email, since } = JSON.parse(meta) as ReservationInfo;
+  if (email !== user.email) {
     return c.json({
-      text: `You cannot unreserve \`${environment}\` as it is being reserved by <${id}> since ${formatDate(since)}`,
+      text: `You cannot unreserve \`${environment}\` as it is being reserved by \`${email}\` since ${formatDate(since)}`,
     });
   }
 
