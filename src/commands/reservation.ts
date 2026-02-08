@@ -24,8 +24,8 @@ async function generateEnvironmentUsage(
         header: env,
         collapsible: true,
         widgets: [
-          alias
-            ? { textParagraph: `Also known as ${alias.join(', ')}` }
+          alias.length
+            ? { textParagraph: { text: `Also known as ${alias.join(', ')}` } }
             : undefined,
           {
             decoratedText: {
