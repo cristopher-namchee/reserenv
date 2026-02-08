@@ -1,18 +1,11 @@
 import { Environments } from '../const';
 import { getGoogleAuthToken } from '../lib/google';
 
-import type { Env } from '../types';
-
-interface ReservationInfo {
-  id: string;
-  since: string; // ISO string
-  channel: string;
-}
+import type { Env, ReservationInfo } from '../types';
 
 interface UserReservation {
   environment: string;
   since: string;
-  channel: string;
 }
 
 export default async function (env: Env) {
@@ -23,15 +16,13 @@ export default async function (env: Env) {
       const reservation = await env.ENVIRONMENT_RESERVATION.get(environment);
 
       if (reservation) {
-        const { id, since, channel } = JSON.parse(
-          reservation,
-        ) as ReservationInfo;
+        const { id, since } = JSON.parse(reservation) as ReservationInfo;
 
         if (!reservations[id]) {
           reservations[id] = [];
         }
 
-        reservations[id].push({ environment, since, channel });
+        reservations[id].push({ environment, since });
       }
     }),
   );
@@ -77,7 +68,7 @@ Please don't forget to unreserve the environment(s) with the \`/unreserve\` comm
 - Clean temporary files`;
 
       const response = await fetch(
-        `https://chat.googleapis.com/v1/${reservations[0].channel}/messages`,
+        `https://chat.googleapis.com/v1/spaces/${env.GOOGLE_SPACE}/messages`,
         {
           method: 'POST',
           headers: {

@@ -49,10 +49,10 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   }
 
   const newMeta = JSON.stringify({
+    id: user.name,
     email: user.email,
     name: user.displayName,
     since: new Date().toISOString(),
-    channel: space.name,
   });
   await c.env.ENVIRONMENT_RESERVATION.put(environment, newMeta);
 
