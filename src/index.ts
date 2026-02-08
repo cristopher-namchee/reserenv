@@ -38,12 +38,6 @@ app.post('/', async (c) => {
   return c.json({});
 });
 
-app.get('/send-reminder', async (c) => {
-  await sendReminder(c.env);
-
-  return c.json({ message: 'Reminder sent!' });
-});
-
 app.onError((e, c) => {
   console.error(e);
 
