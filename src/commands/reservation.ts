@@ -14,7 +14,7 @@ async function generateEnvironmentUsage(
     environments.map(async (env) => {
       const rawInfo = await kv.get(env);
 
-      const user = rawInfo ? JSON.parse(rawInfo) as ReservationInfo : null;
+      const user = rawInfo ? (JSON.parse(rawInfo) as ReservationInfo) : null;
 
       return { env, reservation: user };
     }),
@@ -22,9 +22,17 @@ async function generateEnvironmentUsage(
 
   return `Below are the list of GLChat environment reservation status.
 
-  ${envData.map(({ env, reservation }) => `🗄️ *${env}*
- ┗ ${reservation ? `👤 <https://contacts.google.com/${reservation.email}|${reservation.name}>
-🗓️ ${formatDate(reservation.since)}` : `_Available_`}`).join('\n\n')}
+  ${envData
+    .map(
+      ({ env, reservation }) => `🗄️ *${env}*
+ ┗ ${
+   reservation
+     ? `👤 <https://contacts.google.com/${reservation.email}|${reservation.name}>
+🗓️ ${formatDate(reservation.since)}`
+     : `_Available_`
+ }`,
+    )
+    .join('\n\n')}
 `;
 }
 
