@@ -18,14 +18,14 @@ async function generateEnvironmentUsage(
 
       const alias = Object.entries(EnvironmentAlias)
         .filter(([_, value]) => value === env)
-        .map(([key, _]) => `\`${key}\``);
+        .map(([key, _]) => `<code>${key}</code>`);
 
       return {
         header: env,
         collapsible: true,
         widgets: [
-          alias
-            ? { textParagraph: `Also known as ${alias.join(', ')}` }
+          alias.length
+            ? { textParagraph: { text: `Also known as ${alias.join(', ')}` } }
             : undefined,
           {
             decoratedText: {
