@@ -22,14 +22,14 @@ async function generateEnvironmentUsage(
 
   return `Below are the list of GLChat environment reservation status.
 
-  ${envData
+${envData
     .map(
       ({ env, reservation }) => `⚙️ *${env}*
   ┗ ${
     reservation
       ? `👤 <https://contacts.google.com/${reservation.email}|${reservation.name}>
      🗓️ ${formatDate(reservation.since)}`
-      : `_Available_`
+      : ` _Available_`
   }`,
     )
     .join('\n\n')}
