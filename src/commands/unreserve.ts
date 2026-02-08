@@ -21,6 +21,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
 Available environment(s):
 
 ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
+      privateMessageViewer: {
+        name: user.name,
+      },
     });
   }
 
@@ -32,6 +35,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
         environments.length === 0
           ? "The specified environment doesn't exist!"
           : 'To avoid accidents, you *cannot* unreserve more than 1 environment at once. Please unreserve them one by one.',
+      privateMessageViewer: {
+        name: user.name,
+      },
     });
   }
 
@@ -41,6 +47,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   if (!meta) {
     return c.json({
       text: `Environment \`${environment}\` is not being reserved.`,
+      privateMessageViewer: {
+        name: user.name,
+      },
     });
   }
 
@@ -48,6 +57,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   if (email !== user.email) {
     return c.json({
       text: `You cannot unreserve \`${environment}\` as it is being reserved by <https://contacts.google.com/${email}|${name}> since ${formatDate(since)}`,
+      privateMessageViewer: {
+        name: user.name,
+      },
     });
   }
 
@@ -55,5 +67,8 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
 
   return c.json({
     text: `Environment \`${environment}\` has been successfully unreserved`,
+    privateMessageViewer: {
+      name: user.name,
+    },
   });
 }

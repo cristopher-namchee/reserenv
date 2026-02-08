@@ -1,6 +1,8 @@
 export interface Env {
   ENVIRONMENT_RESERVATION: KVNamespace;
 
+  GOOGLE_SPACE: string;
+
   SERVICE_ACCOUNT_EMAIL: string;
   SERVICE_ACCOUNT_PRIVATE_KEY: string;
 }
@@ -23,6 +25,7 @@ export interface GoogleChatEvent {
     };
   };
   user: {
+    name: string;
     type: 'HUMAN' | 'BOT';
     email: string;
     displayName: string;
@@ -30,6 +33,7 @@ export interface GoogleChatEvent {
 }
 
 export interface ReservationInfo {
+  id: string;
   email: string;
   name: string;
   since: string;
