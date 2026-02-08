@@ -20,6 +20,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
 Available environment(s):
 
 ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
+      privateMessageViewer: {
+        name: user.name,
+      },
     });
   }
 
@@ -31,6 +34,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
         environments.length === 0
           ? "The specified environment doesn't exist!"
           : 'To avoid resource hogging, you *cannot* reserve more than 1 environment at once for now. Please reserve them one by one.',
+      privateMessageViewer: {
+        name: user.name,
+      },
     });
   }
 
@@ -45,6 +51,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
         email === user.email
           ? 'You have this environment reserved already!'
           : `Environment \`${environment}\` is still being reserved by <https://contacts.google.com/${email}|${name}>. Please ask the user to unreserve it first.`,
+      privateMessageViewer: {
+        name: user.name,
+      },
     });
   }
 
@@ -58,5 +67,8 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
 
   return c.json({
     text: `Environment \`${environment}\` successfully reserved.`,
+    privateMessageViewer: {
+      name: user.name,
+    },
   });
 }

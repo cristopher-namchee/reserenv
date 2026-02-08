@@ -42,7 +42,7 @@ async function generateEnvironmentUsage(
                 : 'Available for reservation',
             },
           },
-        ],
+        ].filter(Boolean),
       };
     }),
   );
@@ -81,7 +81,12 @@ export default async function (c: Context<{ Bindings: Env }>) {
       c.env.ENVIRONMENT_RESERVATION,
     );
 
-    return c.json(card);
+    return c.json({
+      ...card,
+      privateMessageViewer: {
+        name: user.name,
+      },
+    });
   }
 
   const environments = normalizeEnvironments(params);
@@ -89,6 +94,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
   if (environments.length === 0) {
     return c.json({
       text: "The specified environment(s) doesn't exist!",
+      privateMessageViewer: {
+        name: user.name,
+      },
     });
   }
 
@@ -100,6 +108,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
     if (!status) {
       return c.json({
         text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
+        privateMessageViewer: {
+          name: user.name,
+        },
       });
     }
 
@@ -110,6 +121,9 @@ export default async function (c: Context<{ Bindings: Env }>) {
         reservation.email === user.email
           ? 'You are currently reserving this environment.'
           : `Environment \`${environment}\` is being reserved by <https://contacts.google.com/${reservation.email}|${reservation.name}> since ${formatDate(reservation.since)}`,
+      privateMessageViewer: {
+        name: user.name,
+      },
     });
   }
 
@@ -118,5 +132,10 @@ export default async function (c: Context<{ Bindings: Env }>) {
     c.env.ENVIRONMENT_RESERVATION,
   );
 
-  return c.json(card);
+  return c.json({
+    ...card,
+    privateMessageViewer: {
+      name: user.name,
+    },
+  });
 }
