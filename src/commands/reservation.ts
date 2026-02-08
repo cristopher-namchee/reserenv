@@ -84,13 +84,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
       c.env.ENVIRONMENT_RESERVATION,
     );
 
-    console.log({
-      ...card,
-      privateMessageViewer: {
-        name: user.name,
-      },
-    });
-
     return c.json({
       ...card,
       privateMessageViewer: {
