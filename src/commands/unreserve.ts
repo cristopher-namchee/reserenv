@@ -44,10 +44,10 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     });
   }
 
-  const { email, since } = JSON.parse(meta) as ReservationInfo;
+  const { email, since, name } = JSON.parse(meta) as ReservationInfo;
   if (email !== user.email) {
     return c.json({
-      text: `You cannot unreserve \`${environment}\` as it is being reserved by \`${email}\` since ${formatDate(since)}`,
+      text: `You cannot unreserve \`${environment}\` as it is being reserved by <https://contacts.google.com/${email}|${name}> since ${formatDate(since)}`,
     });
   }
 
