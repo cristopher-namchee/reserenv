@@ -24,13 +24,13 @@ async function generateEnvironmentUsage(
 
   ${envData
     .map(
-      ({ env, reservation }) => `🗄️ *${env}*
- ┗ ${
-   reservation
-     ? `👤 <https://contacts.google.com/${reservation.email}|${reservation.name}>
-🗓️ ${formatDate(reservation.since)}`
-     : `_Available_`
- }`,
+      ({ env, reservation }) => `⚙️ *${env}*
+  ┗ ${
+    reservation
+      ? `👤 <https://contacts.google.com/${reservation.email}|${reservation.name}>
+     🗓️ ${formatDate(reservation.since)}`
+      : `_Available_`
+  }`,
     )
     .join('\n\n')}
 `;
