@@ -23,6 +23,7 @@ async function generateEnvironmentUsage(
       return {
         header: env,
         collapsible: true,
+        uncollapsibleWidgetsCount: alias.length ? 1 : 0,
         widgets: [
           alias.length
             ? { textParagraph: { text: `Also known as ${alias.join(', ')}` } }
@@ -51,10 +52,12 @@ async function generateEnvironmentUsage(
     cardsV2: [
       {
         cardId: 'card-environment',
-        header: {
-          title: 'Reservation Info',
+        card: {
+          header: {
+            title: 'Reservation Info',
+          },
+          sections: envSections,
         },
-        sections: envSections,
       },
     ],
   };
