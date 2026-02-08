@@ -18,7 +18,7 @@ async function generateEnvironmentUsage(
 
       const alias = Object.entries(EnvironmentAlias)
         .filter(([_, value]) => value === env)
-        .map(([key, _]) => `\`${key}\``);
+        .map(([key, _]) => `<code>${key}</code>`);
 
       return {
         header: env,
