@@ -3,37 +3,61 @@ import type { Context } from 'hono';
 import { EnvironmentAlias, Environments } from '../const';
 import { formatDate } from '../lib/date';
 import { normalizeEnvironments } from '../lib/env';
-import { getChatLink, getGoogleAuthToken } from '../lib/google';
+import { getGoogleAuthToken } from '../lib/google';
 import type { Env, GoogleChatEvent, ReservationInfo } from '../types';
 
 async function generateEnvironmentUsage(
   environments: string[],
   kv: KVNamespace,
 ) {
-  const envData = await Promise.all(
+  const envSections = await Promise.all(
     environments.map(async (env) => {
       const rawInfo = await kv.get(env);
 
       const user = rawInfo ? (JSON.parse(rawInfo) as ReservationInfo) : null;
 
-      return { env, reservation: user };
+      const alias = Object.entries(EnvironmentAlias)
+        .filter(([_, value]) => value === env)
+        .map(([key, _]) => `\`${key}\``);
+
+      return {
+        header: env,
+        collapsible: true,
+        widgets: [
+          alias
+            ? { textParagraph: `Also known as ${alias.join(', ')}` }
+            : undefined,
+          {
+            decoratedText: {
+              icon: {
+                materialIcon: {
+                  name: 'account_circle',
+                },
+              },
+              text: user
+                ? `<a href="https://contacts.google.com/${user.email}">${user.name}</a>`
+                : '-',
+              bottomLabel: user
+                ? formatDate(user.since)
+                : 'Available for reservation',
+            },
+          },
+        ],
+      };
     }),
   );
 
-  return `Below are the list of GLChat environment reservation status.
-
-${envData
-    .map(
-      ({ env, reservation }) => `⚙️ *${env}*
-  ┗ ${
-    reservation
-      ? `👤 <https://contacts.google.com/${reservation.email}|${reservation.name}>
-     🗓️ ${formatDate(reservation.since)}`
-      : ` _Available_`
-  }`,
-    )
-    .join('\n\n')}
-`;
+  return {
+    cardsV2: [
+      {
+        cardId: 'card-environment',
+        header: {
+          title: 'Reservation Info',
+        },
+        sections: envSections,
+      },
+    ],
+  };
 }
 
 export default async function (c: Context<{ Bindings: Env }>) {
@@ -52,14 +76,12 @@ export default async function (c: Context<{ Bindings: Env }>) {
 
   // only the slash
   if (params.length === 0) {
-    const text = await generateEnvironmentUsage(
+    const card = await generateEnvironmentUsage(
       Environments,
       c.env.ENVIRONMENT_RESERVATION,
     );
 
-    return c.json({
-      text,
-    });
+    return c.json(card);
   }
 
   const environments = normalizeEnvironments(params);
@@ -91,12 +113,10 @@ export default async function (c: Context<{ Bindings: Env }>) {
     });
   }
 
-  const text = await generateEnvironmentUsage(
+  const card = await generateEnvironmentUsage(
     environments,
     c.env.ENVIRONMENT_RESERVATION,
   );
 
-  return c.json({
-    text,
-  });
+  return c.json(card);
 }
