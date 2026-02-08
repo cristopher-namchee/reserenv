@@ -36,15 +36,15 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
 
   const environment = environments[0];
 
-  const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
-  if (meta) {
-    const { email } = JSON.parse(meta) as ReservationInfo;
+  const reservation = await c.env.ENVIRONMENT_RESERVATION.get(environment);
+  if (reservation) {
+    const { email, name } = JSON.parse(reservation) as ReservationInfo;
 
     return c.json({
       text:
         email === user.email
           ? 'You have this environment reserved already!'
-          : `Environment \`${environment}\` is still being reserved by \`${email}\`. Please ask the user to unreserve it first.`,
+          : `Environment \`${environment}\` is still being reserved by <https://contacts.google.com/${email}|${name}>. Please ask the user to unreserve it first.`,
     });
   }
 
