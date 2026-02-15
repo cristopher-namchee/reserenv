@@ -1,28 +1,28 @@
 import type { Context } from 'hono';
 
-import { Environments } from '../const';
+import { Environments, Services } from '../const';
 import { normalizeEnvironments, normalizeServices } from '../lib/params';
-import type { Env, GoogleChatEvent, ReservationInfo } from '../types';
-
-interface ReservationResult {
-  message: string;
-  success: boolean;
-}
+import type {
+  Env,
+  GoogleChatEvent,
+  RequestPayload,
+  RequestResult,
+  ReservationInfo,
+} from '../types';
 
 async function reserveService(
   kv: KVNamespace,
   reservation: ReservationInfo,
-  env: string,
-  service: string,
-): Promise<ReservationResult> {
-  const key = `${env}-${service}`;
+  payload: RequestPayload,
+): Promise<RequestResult> {
+  const key = `${payload.environment}-${payload.service}`;
   const current = await kv.get(key);
   if (!current) {
     await kv.put(key, JSON.stringify(reservation));
 
     return {
       success: true,
-      message: `Service \`${service}\` in \`${env}\` has been successfully reserved.`,
+      message: `Service \`${payload.service}\` in \`${payload.environment}\` has been successfully reserved.`,
     };
   }
 
@@ -31,14 +31,14 @@ async function reserveService(
   if (id === reservation.id) {
     return {
       success: false,
-      message: `You have reserved \`${service}\` in \`${env}\` already!`,
+      message: `You have reserved \`${payload.service}\` in \`${payload.environment}\` already!`,
     };
   }
 
   return {
     success: false,
-    message: `Service \`${service}\` in \`${env}\` is still being reserved by <https://contacts.google.com/${email}|${name}>. Please ask the user to unreserve it first.`,
-  }
+    message: `Service \`${payload.service}\` in \`${payload.environment}\` is still being reserved by <https://contacts.google.com/${email}|${name}>. Please ask the user to unreserve it first.`,
+  };
 }
 
 export default async function (c: Context<{ Bindings: Env }>) {
@@ -68,9 +68,9 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
 
   if (environments.length !== 1) {
     return c.json({
-      text: `The specified environment don't exist!
+      text: `The specified environment doesn't exist!
 
-Available environment(s):
+Available environments:
 
 ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
       privateMessageViewer: {
@@ -80,37 +80,65 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   }
 
   const environment = environments[0];
-  const rawServices = params.slice(2);
+  const rawServices = params
+    .slice(2)
+    .map((param) => param.trim())
+    .filter(Boolean);
 
-  const newMeta = JSON.stringify({
-    id: user.name,
-    email: user.email,
-    name: user.displayName,
-    since: new Date().toISOString(),
-  });
-
-  if (!rawServices) {
-  }
-
-  const reservation = await c.env.ENVIRONMENT_RESERVATION.get(environment);
-  if (reservation) {
-    const { email, name } = JSON.parse(reservation) as ReservationInfo;
-
+  const services = rawServices.length
+    ? normalizeServices(rawServices)
+    : Services;
+  if (!services.length) {
     return c.json({
-      text:
-        email === user.email
-          ? 'You have this environment reserved already!'
-          :
+      text: `The specified services don't exist!
+
+Available services:
+
+${Services.map((env) => `- \`${env}\``).join('\n')}`,
       privateMessageViewer: {
         name: user.name,
       },
     });
   }
 
-  await c.env.ENVIRONMENT_RESERVATION.put(environment, newMeta);
+  const meta: ReservationInfo = {
+    id: user.name,
+    name: user.displayName,
+    email: user.email,
+    since: new Date().toISOString(),
+  };
+
+  const results = await Promise.all(
+    rawServices.map(async (svc) => {
+      if (!services.includes(svc)) {
+        return Promise.resolve({
+          success: false,
+          message: `Service \`${svc}\` doesn't exist in environment \`${environment}\``,
+        });
+      }
+
+      return reserveService(c.env.ENVIRONMENT_RESERVATION, meta, {
+        environment,
+        service: svc,
+      });
+    }),
+  );
+
+  const tokens = [];
+  let count = 0;
+
+  for (const { message, success } of results) {
+    tokens.push(`${success ? '✅' : '❌'} ${message}`);
+
+    if (success) {
+      count++;
+    }
+  }
 
   return c.json({
-    text: `Environment \`${environment}\` successfully reserved.`,
+    text: `${tokens.join('\n')}
+
+${count} of ${rawServices.length} request succeeded.`,
     privateMessageViewer: {
       name: user.name,
     },
