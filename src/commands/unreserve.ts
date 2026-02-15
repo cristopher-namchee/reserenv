@@ -1,74 +1,45 @@
 import type { Context } from 'hono';
 
-import { Environments } from '../const';
+import { handleWriteCommand } from '../lib/command';
 import { formatDate } from '../lib/date';
-import { normalizeEnvironments } from '../lib/env';
-import type { Env, GoogleChatEvent, ReservationInfo } from '../types';
+import type {
+  Env,
+  RequestPayload,
+  RequestResult,
+  ReservationInfo,
+} from '../types';
+
+async function unreserveService(
+  kv: KVNamespace,
+  reservation: ReservationInfo,
+  payload: RequestPayload,
+): Promise<RequestResult> {
+  const key = `${payload.environment}-${payload.service}`;
+  const current = await kv.get(key);
+  if (!current) {
+    return {
+      success: false,
+      message: `Service \`${payload.service}\` in \`${payload.environment}\` is not reserved.`,
+    };
+  }
+
+  const { id, email, name, since } = JSON.parse(current) as ReservationInfo;
+
+  if (id !== reservation.id) {
+    return {
+      success: false,
+      message: `You cannot unreserve \`${payload.service}\` in \`${payload.environment}\` as it is still being reserved by <https://contacts.google.com/${email}|${name}> since ${formatDate(since)}.`,
+    };
+  }
+
+  await kv.delete(key);
+
+  return {
+    success: true,
+    message: `Service \`${payload.service}\` in \`${payload.environment}\` has been successfully unreserved.`,
+  };
+}
 
 export default async function (c: Context<{ Bindings: Env }>) {
-  const { user, message } = (await c.req.json()) as GoogleChatEvent;
-
-  if (!message) {
-    return c.json({});
-  }
-
-  const [_, ...params] = message.text.split(/\s+/);
-
-  if (params.length === 0) {
-    return c.json({
-      text: `You need to specify the environment you want to unreserve.
-
-Available environment(s):
-
-${Environments.map((env) => `- \`${env}\``).join('\n')}`,
-      privateMessageViewer: {
-        name: user.name,
-      },
-    });
-  }
-
-  const environments = normalizeEnvironments(params);
-
-  if (environments.length !== 1) {
-    return c.json({
-      text:
-        environments.length === 0
-          ? "The specified environment doesn't exist!"
-          : 'To avoid accidents, you *cannot* unreserve more than 1 environment at once. Please unreserve them one by one.',
-      privateMessageViewer: {
-        name: user.name,
-      },
-    });
-  }
-
-  const environment = environments[0];
-
-  const meta = await c.env.ENVIRONMENT_RESERVATION.get(environment);
-  if (!meta) {
-    return c.json({
-      text: `Environment \`${environment}\` is not being reserved.`,
-      privateMessageViewer: {
-        name: user.name,
-      },
-    });
-  }
-
-  const { email, since, name } = JSON.parse(meta) as ReservationInfo;
-  if (email !== user.email) {
-    return c.json({
-      text: `You cannot unreserve \`${environment}\` as it is being reserved by <https://contacts.google.com/${email}|${name}> since ${formatDate(since)}`,
-      privateMessageViewer: {
-        name: user.name,
-      },
-    });
-  }
-
-  await c.env.ENVIRONMENT_RESERVATION.delete(environment);
-
-  return c.json({
-    text: `Environment \`${environment}\` has been successfully unreserved`,
-    privateMessageViewer: {
-      name: user.name,
-    },
-  });
+  return handleWriteCommand(c, unreserveService);
 }
