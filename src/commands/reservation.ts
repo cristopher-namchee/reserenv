@@ -2,12 +2,12 @@ import type { Context } from 'hono';
 
 import { EnvironmentAlias, Environments } from '../const';
 import { formatDate } from '../lib/date';
-import { normalizeEnvironments } from '../lib/env';
 import { getGoogleAuthToken } from '../lib/google';
+import { normalizeEnvironments } from '../lib/params';
 import type { Env, GoogleChatEvent, ReservationInfo } from '../types';
 
 async function generateEnvironmentUsage(
-  environments: string[],
+  environments: typeof Environments,
   kv: KVNamespace,
 ) {
   const envSections = await Promise.all(

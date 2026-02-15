@@ -26,14 +26,16 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     });
   }
 
-  const environments = normalizeEnvironments(params);
+  // extract only the first one
+  const environments = normalizeEnvironments([params[1]]);
 
   if (environments.length !== 1) {
     return c.json({
-      text:
-        environments.length === 0
-          ? "The specified environment doesn't exist!"
-          : 'To avoid resource hogging, you *cannot* reserve more than 1 environment at once for now. Please reserve them one by one.',
+      text: `The specified environment(s) don't exist!
+
+Available environment(s):
+
+${Environments.map((env) => `- \`${env}\``).join('\n')}`,
       privateMessageViewer: {
         name: user.name,
       },
