@@ -37,26 +37,6 @@ app.post('/', async (c) => {
   return c.json({});
 });
 
-app.get('/migrate', async (c) => {
-  const { keys } = await c.env.ENVIRONMENT_RESERVATION.list();
-
-  await Promise.all(
-    keys.map(async ({ name }) => {
-      const value = await c.env.ENVIRONMENT_RESERVATION.get(name);
-
-      const newKeys = Services.map((svc) => `${name}-${svc}`);
-
-      return Promise.all(
-        newKeys.map((k) =>
-          c.env.ENVIRONMENT_RESERVATION.put(k, value as string),
-        ),
-      );
-    }),
-  );
-
-  return c.json({ message: 'yay' }, 200);
-});
-
 app.onError((e, c) => {
   console.error(e);
 
