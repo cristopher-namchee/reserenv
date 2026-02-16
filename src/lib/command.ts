@@ -39,7 +39,7 @@ export async function handleWriteCommand(
     return c.json({
       text: `You need to specify the environment you want to reserve.
 
-Available environment(s):
+Available environments:
 
 ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
       privateMessageViewer: {
@@ -49,7 +49,7 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
   }
 
   // extract only the first one
-  const environments = normalizeEnvironments([params[1]]);
+  const environments = normalizeEnvironments([params[0]]);
 
   if (!environments.length) {
     return c.json({
@@ -66,7 +66,7 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
 
   const environment = environments[0];
   const rawServices = params
-    .slice(2)
+    .slice(1)
     .map((param) => param.trim())
     .filter(Boolean);
 
@@ -75,7 +75,7 @@ ${Environments.map((env) => `- \`${env}\``).join('\n')}`,
     : Services;
   if (!services.length) {
     return c.json({
-      text: `The specified services don't exist!
+      text: `The specified service(s) doesn't exist!
 
 Available services:
 
@@ -123,7 +123,7 @@ ${Services.map((env) => `- \`${env}\``).join('\n')}`,
   return c.json({
     text: `${tokens.join('\n')}
 
-${count} of ${rawServices.length} request succeeded.`,
+${count} of ${rawServices.length} request${rawServices.length > 1 ? 's' : ''} succeeded.`,
     privateMessageViewer: {
       name: user.name,
     },

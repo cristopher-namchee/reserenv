@@ -49,8 +49,6 @@ app.onError((e, c) => {
   );
 });
 
-export { app };
-
 export default {
   fetch: app.fetch,
   scheduled: async (
