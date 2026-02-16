@@ -1,6 +1,11 @@
 import type { Context } from 'hono';
 
-import { EnvironmentAlias, Environments } from '../const';
+import {
+  EnvironmentAlias,
+  Environments,
+  ServiceLabel,
+  Services,
+} from '../const';
 import { formatDate } from '../lib/date';
 import { getGoogleAuthToken } from '../lib/google';
 import { normalizeEnvironments } from '../lib/params';
@@ -12,9 +17,12 @@ async function generateEnvironmentUsage(
 ) {
   const envSections = await Promise.all(
     environments.map(async (env) => {
-      const rawInfo = await kv.get(env);
-
-      const user = rawInfo ? (JSON.parse(rawInfo) as ReservationInfo) : null;
+      const rawInfo = await Promise.all(
+        Services.map(async (service) => ({
+          service,
+          info: await kv.get(`${env}-${service}`),
+        })),
+      );
 
       const alias = Object.entries(EnvironmentAlias)
         .filter(([_, value]) => value === env)
@@ -28,21 +36,23 @@ async function generateEnvironmentUsage(
           alias.length
             ? { textParagraph: { text: `Also known as ${alias.join(', ')}` } }
             : undefined,
-          {
-            decoratedText: {
-              icon: {
-                materialIcon: {
-                  name: 'account_circle',
+          ...rawInfo.map(({ service, info }) => {
+            const user = info ? (JSON.parse(info) as ReservationInfo) : null;
+
+            return {
+              decoratedText: {
+                icon: {
+                  materialIcon: {
+                    name: 'account_circle',
+                  },
                 },
+                text: user
+                  ? `<a href="https://contacts.google.com/${user.email}">${user.name}</a>`
+                  : '-',
+                bottomLabel: `${ServiceLabel[service]} ${user ? formatDate(user.since) : 'Available for reservation'}`,
               },
-              text: user
-                ? `<a href="https://contacts.google.com/${user.email}">${user.name}</a>`
-                : '-',
-              bottomLabel: user
-                ? formatDate(user.since)
-                : 'Available for reservation',
-            },
-          },
+            };
+          }),
         ].filter(Boolean),
       };
     }),
@@ -97,33 +107,6 @@ export default async function (c: Context<{ Bindings: Env }>) {
   if (environments.length === 0) {
     return c.json({
       text: "The specified environment(s) doesn't exist!",
-      privateMessageViewer: {
-        name: user.name,
-      },
-    });
-  }
-
-  if (environments.length === 1) {
-    const environment = environments[0];
-
-    const status = await c.env.ENVIRONMENT_RESERVATION.get(environment);
-
-    if (!status) {
-      return c.json({
-        text: `Environment \`${environment}\` is unused. You may reserve it with \`/reserve\` command`,
-        privateMessageViewer: {
-          name: user.name,
-        },
-      });
-    }
-
-    const reservation = JSON.parse(status) as ReservationInfo;
-
-    return c.json({
-      text:
-        reservation.email === user.email
-          ? 'You are currently reserving this environment.'
-          : `Environment \`${environment}\` is being reserved by <https://contacts.google.com/${reservation.email}|${reservation.name}> since ${formatDate(reservation.since)}`,
       privateMessageViewer: {
         name: user.name,
       },

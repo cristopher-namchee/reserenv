@@ -22,3 +22,9 @@ export const ServiceAlias: Record<string, string> = {
   backend: 'be',
   'back-end': 'be',
 };
+
+export const ServiceLabel: Record<string, string> = {
+  fe: 'Frontend',
+  be: 'Backend',
+  dpo: 'DPO',
+};
