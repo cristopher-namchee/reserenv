@@ -1,4 +1,3 @@
-import { ServiceLabel } from '../const';
 import { formatDate } from '../lib/date';
 import { getGoogleAuthToken } from '../lib/google';
 
@@ -50,7 +49,7 @@ Hello {user}! This is a friendly reminder that you still have the following envi
 ${reservations
   .map(
     ({ environment, since, service }) =>
-      `- \`${ServiceLabel[service]}\` in \`${environment}\`, _since ${formatDate(since)}_`,
+      `- \`${service}\` in \`${environment}\`, _since ${formatDate(since)}_`,
   )
   .join('\n')}
 
