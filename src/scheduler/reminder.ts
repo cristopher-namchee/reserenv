@@ -1,19 +1,24 @@
-import { Environments } from '../const';
+import { ServiceLabel } from '../const';
+import { formatDate } from '../lib/date';
 import { getGoogleAuthToken } from '../lib/google';
 
 import type { Env, ReservationInfo } from '../types';
 
 interface UserReservation {
   environment: string;
+  service: string;
   since: string;
 }
 
 export default async function (env: Env) {
   const reservations: Record<string, UserReservation[]> = {};
 
+  const { keys } = await env.ENVIRONMENT_RESERVATION.list();
+
   await Promise.all(
-    Environments.map(async (environment) => {
-      const reservation = await env.ENVIRONMENT_RESERVATION.get(environment);
+    keys.map(async ({ name }) => {
+      const [environment, service] = name.split('-');
+      const reservation = await env.ENVIRONMENT_RESERVATION.get(name);
 
       if (reservation) {
         const { id, since } = JSON.parse(reservation) as ReservationInfo;
@@ -22,7 +27,7 @@ export default async function (env: Env) {
           reservations[id] = [];
         }
 
-        reservations[id].push({ environment, since });
+        reservations[id].push({ environment, since, service });
       }
     }),
   );
@@ -44,14 +49,8 @@ Hello {user}! This is a friendly reminder that you still have the following envi
 
 ${reservations
   .map(
-    ({ environment, since }, idx) =>
-      `${idx + 1}. \`${environment}\`, _since ${new Date(
-        since,
-      ).toLocaleDateString('en-GB', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })}_`,
+    ({ environment, since, service }) =>
+      `- \`${ServiceLabel[service]}\` in \`${environment}\`, _since ${formatDate(since)}_`,
   )
   .join('\n')}
 
