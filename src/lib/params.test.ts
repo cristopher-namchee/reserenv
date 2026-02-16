@@ -55,7 +55,10 @@ describe('normalizeServices', () => {
   });
 
   it('should keep valid services', () => {
-    expect(normalizeServices(['fe', 'be'])).toEqual(['be', 'fe']);
+    expect(normalizeServices(['frontend', 'backend'])).toEqual([
+      'backend',
+      'frontend',
+    ]);
   });
 
   it('should ignore cases', () => {
@@ -63,23 +66,34 @@ describe('normalizeServices', () => {
   });
 
   it('should replace alias with actual service name', () => {
-    expect(normalizeServices(['front-end', 'backend'])).toEqual(['be', 'fe']);
+    expect(normalizeServices(['fe', 'be'])).toEqual(['backend', 'frontend']);
   });
 
   it('should trim whitespace', () => {
-    expect(normalizeServices([' fe ', ' be '])).toEqual(['be', 'fe']);
+    expect(normalizeServices([' frontend ', ' backend '])).toEqual([
+      'backend',
+      'frontend',
+    ]);
   });
 
   it('should removes invalid services', () => {
-    expect(normalizeServices(['fe', 'prod', 'foo'])).toEqual(['fe']);
+    expect(normalizeServices(['frontend', 'prod', 'foo'])).toEqual([
+      'frontend',
+    ]);
   });
 
   it('should deduplicate services', () => {
-    expect(normalizeServices(['fe', 'fe', 'be'])).toEqual(['be', 'fe']);
+    expect(normalizeServices(['frontend', 'frontend', 'backend'])).toEqual([
+      'backend',
+      'frontend',
+    ]);
   });
 
   it('should sort services alphabetically', () => {
-    expect(normalizeServices(['fe', 'be'])).toEqual(['be', 'fe']);
+    expect(normalizeServices(['frontend', 'backend'])).toEqual([
+      'backend',
+      'frontend',
+    ]);
   });
 
   it('should ignore empty or whitespace-only values', () => {

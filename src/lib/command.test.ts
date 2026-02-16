@@ -138,8 +138,8 @@ Available environments:
 
 Available services:
 
-- \`fe\`
-- \`be\`
+- \`frontend\`
+- \`backend\`
 - \`dpo\``,
     });
 
@@ -154,7 +154,7 @@ Available services:
         body: JSON.stringify({
           type: 'MESSAGE',
           message: {
-            text: '/reserve dev fe',
+            text: '/reserve dev frontend',
             slashCommand: {
               commandId: '2',
             },

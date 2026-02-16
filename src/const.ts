@@ -9,7 +9,7 @@ export const JWT = {
 };
 
 export const Environments = ['dev', 'dev2', 'dev3', 'stag'];
-export const Services = ['fe', 'be', 'dpo'];
+export const Services = ['frontend', 'backend', 'dpo'];
 
 export const EnvironmentAlias: Record<string, string> = {
   dev1: 'dev',
@@ -17,10 +17,10 @@ export const EnvironmentAlias: Record<string, string> = {
 };
 
 export const ServiceAlias: Record<string, string> = {
-  frontend: 'fe',
-  'front-end': 'fe',
-  backend: 'be',
-  'back-end': 'be',
+  fe: 'frontend',
+  'front-end': 'frontend',
+  be: 'backend',
+  'back-end': 'backend',
 };
 
 export const ServiceLabel: Record<string, string> = {
