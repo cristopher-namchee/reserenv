@@ -38,3 +38,13 @@ export interface ReservationInfo {
   name: string;
   since: string;
 }
+
+export interface RequestPayload {
+  environment: string;
+  service: string;
+}
+
+export interface RequestResult {
+  message: string;
+  success: boolean;
+}

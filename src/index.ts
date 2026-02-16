@@ -3,9 +3,8 @@ import { type Context, Hono } from 'hono';
 import reservation from './commands/reservation';
 import reserve from './commands/reserve';
 import unreserve from './commands/unreserve';
-
+import { Services } from './const';
 import sendReminder from './scheduler/reminder';
-
 import type { Env, GoogleChatEvent } from './types';
 
 const commandMap: Record<
@@ -36,6 +35,26 @@ app.post('/', async (c) => {
   }
 
   return c.json({});
+});
+
+app.get('/migrate', async (c) => {
+  const { keys } = await c.env.ENVIRONMENT_RESERVATION.list();
+
+  await Promise.all(
+    keys.map(async ({ name }) => {
+      const value = await c.env.ENVIRONMENT_RESERVATION.get(name);
+
+      const newKeys = Services.map((svc) => `${name}-${svc}`);
+
+      return Promise.all(
+        newKeys.map((k) =>
+          c.env.ENVIRONMENT_RESERVATION.put(k, value as string),
+        ),
+      );
+    }),
+  );
+
+  return c.json({ message: 'yay' }, 200);
 });
 
 app.onError((e, c) => {
