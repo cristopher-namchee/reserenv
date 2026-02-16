@@ -93,9 +93,13 @@ ${Services.map((env) => `- \`${env}\``).join('\n')}`,
     since: new Date().toISOString(),
   };
 
+  const referenceArray = rawServices.length ? rawServices : Services;
+
   const results = await Promise.all(
-    rawServices.map(async (svc) => {
-      if (!services.includes(svc)) {
+    referenceArray.map(async (svc) => {
+      const exist = normalizeServices([svc]);
+
+      if (!exist.length) {
         return Promise.resolve({
           success: false,
           message: `Service \`${svc}\` doesn't exist in environment \`${environment}\``,
@@ -123,7 +127,7 @@ ${Services.map((env) => `- \`${env}\``).join('\n')}`,
   return c.json({
     text: `${tokens.join('\n')}
 
-${count} of ${rawServices.length} request${rawServices.length > 1 ? 's' : ''} succeeded.`,
+${count} of ${referenceArray.length} request${referenceArray.length > 1 ? 's' : ''} succeeded.`,
     privateMessageViewer: {
       name: user.name,
     },
