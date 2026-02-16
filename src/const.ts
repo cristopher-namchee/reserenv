@@ -28,3 +28,9 @@ export const ServiceLabel: Record<string, string> = {
   be: 'Backend',
   dpo: 'DPO',
 };
+
+export const ServiceIcon: Record<string, string> = {
+  fe: 'devices',
+  be: 'host',
+  dpo: 'media_link',
+};

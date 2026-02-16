@@ -3,59 +3,80 @@ import type { Context } from 'hono';
 import {
   EnvironmentAlias,
   Environments,
+  ServiceIcon,
   ServiceLabel,
   Services,
 } from '../const';
 import { formatDate } from '../lib/date';
-import { getGoogleAuthToken } from '../lib/google';
 import { normalizeEnvironments } from '../lib/params';
 import type { Env, GoogleChatEvent, ReservationInfo } from '../types';
+
+function createAliasWidget(env: string) {
+  const aliases = Object.entries(EnvironmentAlias)
+    .filter(([_, value]) => value === env)
+    .map(([key, _]) => `<code>${key}</code>`);
+
+  if (aliases.length === 0) return null;
+
+  return {
+    textParagraph: {
+      text: `Also known as ${aliases.join(', ')}`,
+    },
+  };
+}
+
+function createServiceWidget(service: string, info: string | null) {
+  const user = info ? (JSON.parse(info) as ReservationInfo) : null;
+
+  return {
+    decoratedText: {
+      icon: {
+        materialIcon: {
+          name: ServiceIcon[service],
+        },
+      },
+      text: user
+        ? `<a href="https://contacts.google.com/${user.email}">${user.name}</a>`
+        : '-',
+      bottomLabel: `${ServiceLabel[service]} ${user ? formatDate(user.since) : 'Available for reservation'}`,
+    },
+  };
+}
+
+async function getServiceReservations(kv: KVNamespace, env: string) {
+  return Promise.all(
+    Services.map(async (service) => ({
+      service,
+      info: await kv.get(`${env}-${service}`),
+    })),
+  );
+}
+
+async function createEnvironmentSection(kv: KVNamespace, env: string) {
+  const serviceReservations = await getServiceReservations(kv, env);
+  const aliasWidget = createAliasWidget(env);
+
+  const widgets = [
+    aliasWidget,
+    ...serviceReservations.map(({ service, info }) =>
+      createServiceWidget(service, info),
+    ),
+  ].filter(Boolean);
+
+  return {
+    header: env,
+    collapsible: true,
+    uncollapsibleWidgetsCount: aliasWidget ? 1 : 0,
+    widgets,
+  };
+}
 
 async function generateEnvironmentUsage(
   environments: typeof Environments,
   kv: KVNamespace,
 ) {
   const envSections = await Promise.all(
-    environments.map(async (env) => {
-      const rawInfo = await Promise.all(
-        Services.map(async (service) => ({
-          service,
-          info: await kv.get(`${env}-${service}`),
-        })),
-      );
-
-      const alias = Object.entries(EnvironmentAlias)
-        .filter(([_, value]) => value === env)
-        .map(([key, _]) => `<code>${key}</code>`);
-
-      return {
-        header: env,
-        collapsible: true,
-        uncollapsibleWidgetsCount: alias.length ? 1 : 0,
-        widgets: [
-          alias.length
-            ? { textParagraph: { text: `Also known as ${alias.join(', ')}` } }
-            : undefined,
-          ...rawInfo.map(({ service, info }) => {
-            const user = info ? (JSON.parse(info) as ReservationInfo) : null;
-
-            return {
-              decoratedText: {
-                icon: {
-                  materialIcon: {
-                    name: 'account_circle',
-                  },
-                },
-                text: user
-                  ? `<a href="https://contacts.google.com/${user.email}">${user.name}</a>`
-                  : '-',
-                bottomLabel: `${ServiceLabel[service]} ${user ? formatDate(user.since) : 'Available for reservation'}`,
-              },
-            };
-          }),
-        ].filter(Boolean),
-      };
-    }),
+    environments.map((env) => createEnvironmentSection(kv, env)),
   );
 
   return {
@@ -76,12 +97,7 @@ async function generateEnvironmentUsage(
 export default async function (c: Context<{ Bindings: Env }>) {
   const { user, message } = (await c.req.json()) as GoogleChatEvent;
 
-  const token = await getGoogleAuthToken(
-    c.env.SERVICE_ACCOUNT_EMAIL,
-    c.env.SERVICE_ACCOUNT_PRIVATE_KEY,
-  );
-
-  if (!message?.text || !token) {
+  if (!message?.text) {
     return c.json({});
   }
 
