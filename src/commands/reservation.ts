@@ -27,18 +27,19 @@ function createAliasWidget(env: string) {
 
 function createServiceWidget(service: string, info: string | null) {
   const user = info ? (JSON.parse(info) as ReservationInfo) : null;
+  const key = service as keyof typeof ServiceIcon;
 
   return {
     decoratedText: {
       icon: {
         materialIcon: {
-          name: ServiceIcon[service],
+          name: ServiceIcon[key],
         },
       },
       text: user
         ? `<a href="https://contacts.google.com/${user.email}">${user.name}</a>`
         : '-',
-      bottomLabel: `${ServiceLabel[service]} ${user ? formatDate(user.since) : 'Available for reservation'}`,
+      bottomLabel: `${ServiceLabel[key]} — ${user ? formatDate(user.since) : 'Available for reservation'}`,
     },
   };
 }
