@@ -24,13 +24,13 @@ export const ServiceAlias: Record<string, string> = {
 };
 
 export const ServiceLabel: Record<string, string> = {
-  fe: 'Frontend',
-  be: 'Backend',
+  frontend: 'Frontend',
+  backend: 'Backend',
   dpo: 'DPO',
 };
 
 export const ServiceIcon: Record<string, string> = {
-  fe: 'devices',
-  be: 'host',
+  frontend: 'devices',
+  backend: 'host',
   dpo: 'media_link',
 };

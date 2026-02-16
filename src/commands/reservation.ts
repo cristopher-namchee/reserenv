@@ -38,7 +38,7 @@ function createServiceWidget(service: string, info: string | null) {
       text: user
         ? `<a href="https://contacts.google.com/${user.email}">${user.name}</a>`
         : '-',
-      bottomLabel: `${ServiceLabel[service]} ${user ? formatDate(user.since) : 'Available for reservation'}`,
+      bottomLabel: `${ServiceLabel[service]} — ${user ? formatDate(user.since) : 'Available for reservation'}`,
     },
   };
 }
