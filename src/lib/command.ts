@@ -108,7 +108,7 @@ ${Services.map((env) => `- \`${env}\``).join('\n')}`,
 
       return fn(c.env.ENVIRONMENT_RESERVATION, meta, {
         environment,
-        service: svc,
+        service: exist[0],
       });
     }),
   );
